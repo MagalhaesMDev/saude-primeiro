@@ -1,27 +1,48 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import IndexPage from "./pages/Index";
+import MeuSeguroPage from "./pages/MeuSeguro";
+import CuidarPage from "./pages/Cuidar";
+import AprenderPage from "./pages/Aprender";
+import SaudeFemininaPage from "./pages/SaudeFeminina";
+import LoginPage from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import { Header } from "@/components/layout/Header";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { FloatingSupportButton } from "@/components/layout/FloatingSupportButton";
+import { useAuthStore } from "@/store/authStore";
+import { useEffect } from "react";
 
-const queryClient = new QueryClient();
+export default function App() {
+  const { isLoading } = useAuthStore();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+  useEffect(() => {
+    // Inicialização do auth store
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <BrowserRouter>
+      <div className="min-h-screen bg-background">
+        <Header />
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/" element={<IndexPage />} />
+          <Route path="/meu-seguro" element={<MeuSeguroPage />} />
+          <Route path="/cuidar" element={<CuidarPage />} />
+          <Route path="/aprender" element={<AprenderPage />} />
+          <Route path="/saude-feminina" element={<SaudeFemininaPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
-
-export default App;
+        <BottomNav />
+        <FloatingSupportButton />
+      </div>
+    </BrowserRouter>
+  );
+}
