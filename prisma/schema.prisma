@@ -1,0 +1,545 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum PlanType {
+  ESSENTIAL
+  PROTECTION
+  INCOME
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum ReminderType {
+  MEDICATION
+  EXAM
+  VACCINE
+  CONSULTATION
+  OTHER
+}
+
+enum ReminderStatus {
+  PENDING
+  DONE
+  SKIPPED
+}
+
+enum TrailStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum LessonStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum QuizStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum CyclePhase {
+  MENSTRUAL
+  FOLLICULAR
+  OVULATION
+  LUTEAL
+}
+
+enum SymptomIntensity {
+  LIGHT
+  MODERATE
+  SEVERE
+}
+
+enum FlowType {
+  LIGHT
+  MODERATE
+  HEAVY
+}
+
+enum NotificationType {
+  REMINDER
+  SYSTEM
+  PROMOTION
+  ALERT
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  EXPORT
+  DELETE_ALL
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  phone         String?
+  role          UserRole  @default(USER)
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile?
+  subscription  Subscription?
+  claims        Claim[]
+  reminders     Reminder[]
+  vaultDocuments VaultDocument[]
+  consultations Consultation[]
+  trailProgress TrailProgress[]
+  quizAttempts  QuizAttempt[]
+  pointsLedger  PointsLedger[]
+  cashbackLedger CashbackLedger[]
+  cycleEntries  CycleEntry[]
+  symptomLogs   SymptomLog[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  consent       Consent?
+
+  @@index([email])
+  @@index([role])
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  birthDate   DateTime?
+  gender      String?
+  cpf         String?
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  occupation  String?
+  emergencyContact String?
+  emergencyPhone String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Consent {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  dataProcessing  Boolean  @default(false)
+  healthData      Boolean  @default(false)
+  cycleData       Boolean  @default(false)
+  marketing       Boolean  @default(false)
+  termsAccepted   Boolean  @default(false)
+  termsVersion    String   @default("1.0")
+  consentedAt     DateTime?
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String
+  type        PlanType
+  price       Decimal  @db.Decimal(10, 2)
+  description String
+  features    String[]
+  coverage    String[]
+  isPopular   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@index([type])
+  @@index([isActive])
+}
+
+model Subscription {
+  id          String              @id @default(cuid())
+  userId      String
+  planId      String
+  status      SubscriptionStatus  @default(ACTIVE)
+  startedAt   DateTime            @default(now())
+  expiresAt   DateTime?
+  cancelledAt DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  policy      Policy?
+  claims      Claim[]
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+}
+
+model Policy {
+  id          String   @id @default(cuid())
+  subscriptionId String @unique
+  policyNumber String  @unique
+  coverageStart DateTime
+  coverageEnd   DateTime?
+  pdfUrl      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([policyNumber])
+}
+
+model Claim {
+  id          String         @id @default(cuid())
+  userId      String
+  subscriptionId String
+  title       String
+  description String
+  status      ClaimStatus    @default(PENDING)
+  amount      Decimal?       @db.Decimal(10, 2)
+  approvedAt  DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([status])
+}
+
+model Reminder {
+  id          String         @id @default(cuid())
+  userId      String
+  title       String
+  type        ReminderType
+  description String?
+  location    String?
+  scheduledAt DateTime
+  recurrence  String?
+  status      ReminderStatus @default(PENDING)
+  pointsAwarded Int         @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model VaultDocument {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  type        String
+  fileUrl     String
+  encrypted   Boolean  @default(true)
+  uploadedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+}
+
+model Consultation {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  doctorName  String
+  specialty   String
+  scheduledAt DateTime
+  status      String   @default("scheduled")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([scheduledAt])
+}
+
+model Trail {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String
+  icon        String
+  color       String
+  totalLessons Int     @default(5)
+  estimatedTime Int   @default(10) // minutes
+  isFree      Boolean  @default(true)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons     Lesson[]
+  progress    TrailProgress[]
+
+  @@index([category])
+  @@index([isActive])
+  @@index([order])
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  trailId     String
+  title       String
+  description String
+  content     String
+  imageUrl    String?
+  readingTime Int      @default(2) // minutes
+  points      Int      @default(10)
+  cashback    Decimal  @db.Decimal(10, 2) @default(0)
+  order       Int      @default(0)
+  isFree      Boolean  @default(true)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trail       Trail @relation(fields: [trailId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
+  quizzes     Quiz[]
+
+  @@index([trailId])
+  @@index([order])
+  @@index([isActive])
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  status      LessonStatus @default(NOT_STARTED)
+  startedAt   DateTime?
+  completedAt DateTime?
+  pointsEarned Int     @default(0)
+  cashbackEarned Decimal @db.Decimal(10, 2) @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([lessonId])
+  @@index([status])
+  @@unique([userId, lessonId])
+}
+
+model Quiz {
+  id          String   @id @default(cuid())
+  lessonId    String
+  question    String
+  options     String[]
+  correctAnswer Int
+  explanation String
+  points      Int      @default(10)
+  cashback    Decimal  @db.Decimal(10, 2) @default(0)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lesson      Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts    QuizAttempt[]
+
+  @@index([lessonId])
+  @@index([order])
+  @@index([isActive])
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  quizId      String
+  selectedAnswer Int
+  isCorrect   Boolean
+  pointsEarned Int     @default(0)
+  cashbackEarned Decimal @db.Decimal(10, 2) @default(0)
+  attemptedAt DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([quizId])
+  @@index([attemptedAt])
+}
+
+model PointsLedger {
+  id          String   @id @default(cuid())
+  userId      String
+  points      Int
+  source      String
+  description String
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([source])
+  @@index([createdAt])
+}
+
+model Level {
+  id          String   @id @default(cuid())
+  name        String
+  minPoints   Int
+  maxPoints   Int?
+  color       String
+  benefits    String[]
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([minPoints])
+  @@index([isActive])
+  @@index([order])
+}
+
+model CashbackLedger {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Decimal  @db.Decimal(10, 2)
+  source      String
+  description String
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([source])
+  @@index([createdAt])
+}
+
+model GlossaryTerm {
+  id          String   @id @default(cuid())
+  term        String
+  definition  String
+  category    String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@index([order])
+}
+
+model CycleEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime
+  phase       CyclePhase
+  flowType    FlowType?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@index([phase])
+  @@unique([userId, date])
+}
+
+model SymptomLog {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime
+  mood        String?
+  symptoms    String[]
+  intensity   SymptomIntensity?
+  flowType    FlowType?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([read])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      AuditAction
+  resource    String
+  resourceId  String?
+  details     String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  user        User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+}
