@@ -63,6 +63,7 @@ const config: Config = {
         feminine: {
           DEFAULT: 'hsl(var(--feminine))',
           foreground: 'hsl(var(--feminine-foreground))',
+          surface: 'hsl(347 78% 96%)',
         },
         mint: {
           DEFAULT: 'hsl(var(--mint))',

@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 225 60% 98%;
+    --background: 240 100% 98%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 220 79% 26%;
+    --primary: 216 86% 30%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -28,23 +28,23 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --success: 142.1 76.2% 36.3%;
+    --success: 145 72% 29%;
     --success-foreground: 210 40% 98%;
 
-    --warning: 48 96% 53%;
+    --warning: 34 71% 48%;
     --warning-foreground: 222.2 47.4% 11.2%;
 
-    --feminine: 340 82% 52%;
+    --feminine: 347 78% 47%;
     --feminine-foreground: 210 40% 98%;
 
-    --mint: 160 100% 75%;
+    --mint: 151 62% 86%;
     --mint-foreground: 222.2 47.4% 11.2%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 220 79% 26%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 
   .dark {
@@ -107,7 +107,7 @@
 
 @layer components {
   .card {
-    @apply rounded-xl border border-border bg-card text-card-foreground shadow-sm;
+    @apply rounded-2xl border border-border bg-card text-card-foreground shadow-sm;
   }
 
   .btn-primary {

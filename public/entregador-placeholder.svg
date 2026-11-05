@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" role="img" aria-labelledby="title desc">
+  <title id="title">Ilustração de entrega segura</title>
+  <desc id="desc">Pessoa entregadora com mochila em uma motocicleta em uma paisagem urbana.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#dbeafe"/>
+      <stop offset="1" stop-color="#ecfdf5"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="420" fill="url(#sky)"/>
+  <circle cx="738" cy="82" r="44" fill="#fde68a" opacity=".8"/>
+  <path d="M0 316h900v104H0z" fill="#cbd5e1"/>
+  <path d="M0 354h900" stroke="#fff" stroke-dasharray="30 25" stroke-width="8"/>
+  <path d="M116 316V176h106v140m25 0V132h94v184" fill="#bfdbfe"/>
+  <path d="M275 316V204h125v112m348 0V166h95v150" fill="#d1fae5"/>
+  <circle cx="356" cy="322" r="47" fill="#fff" stroke="#0f315d" stroke-width="12"/>
+  <circle cx="552" cy="322" r="47" fill="#fff" stroke="#0f315d" stroke-width="12"/>
+  <path d="m354 321 48-40h88l42 35h-58l-35-45-39 49m87-45 19-44h39l27 49" fill="none" stroke="#0b3d91" stroke-linecap="round" stroke-linejoin="round" stroke-width="13"/>
+  <path d="M398 281c12-23 32-32 58-30l37 7 28 31-20 27h-55l-28-19h-35z" fill="#16a34a"/>
+  <path d="M418 292h50l-5 24h-36z" fill="#0f315d"/>
+  <path d="M524 228h30l23 18" fill="none" stroke="#0f315d" stroke-linecap="round" stroke-width="9"/>
+  <circle cx="474" cy="117" r="28" fill="#9a5b3e"/>
+  <path d="M445 151c12-12 44-12 57 0l23 72h-91z" fill="#0b3d91"/>
+  <path d="m452 218 8 41m18-47 52 21m-88-72-30-9" fill="none" stroke="#9a5b3e" stroke-linecap="round" stroke-width="13"/>
+  <path d="M445 146h58l16 50-78 3z" fill="#16a34a"/>
+  <path d="M435 103c2-29 67-36 77 2z" fill="#0b3d91"/>
+  <rect x="510" y="158" width="72" height="67" rx="10" fill="#16a34a"/>
+  <path d="M527 175h38m-38 15h38" stroke="#dcfce7" stroke-linecap="round" stroke-width="6"/>
+</svg>

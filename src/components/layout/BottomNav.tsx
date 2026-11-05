@@ -1,7 +1,7 @@
 "use client";
 
-import { NavLink } from "react-router-dom";
-import { Home, Shield, Heart, BookOpen } from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
+import { Home, ShieldPlus, HeartHandshake, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -12,16 +12,18 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Início", href: "/", icon: Home },
-  { label: "Meu Seguro", href: "/meu-seguro", icon: Shield },
-  { label: "Cuidar", href: "/cuidar", icon: Heart },
+  { label: "Meu Seguro", href: "/meu-seguro", icon: ShieldPlus },
+  { label: "Cuidar", href: "/cuidar", icon: HeartHandshake },
   { label: "Aprender", href: "/aprender", icon: BookOpen },
-  { label: "Ciclo", href: "/saude-feminina", icon: Heart },
 ];
 
 export function BottomNav() {
+  const location = useLocation();
+  const isFeminine = location.pathname === "/saude-feminina";
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border">
-      <div className="flex items-center justify-around h-16">
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md ${isFeminine ? "border-[#F7E7EC] bg-[#FFF8F9]/95" : "border-border bg-background/95"}`}>
+      <div className="mx-auto flex h-16 max-w-3xl items-center justify-around px-2 sm:px-4">
         {navItems.map((item) => {
           const Icon = item.icon;
 
@@ -29,17 +31,21 @@ export function BottomNav() {
             <NavLink
               key={item.href}
               to={item.href}
+              end={item.href === "/"}
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center justify-center gap-1 h-full px-3 min-w-[60px] transition-colors",
-                  isActive
-                    ? "text-primary"
+                  "flex h-12 min-w-[68px] max-w-28 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 transition-colors",
+                  isActive || (item.href === "/cuidar" && location.pathname === "/saude-feminina")
+                    ? isFeminine ? "bg-feminine/10 text-feminine" : "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 )
               }
             >
               <div className="relative">
                 <Icon className="w-5 h-5" />
+                {item.label === "Aprender" && (
+                  <span aria-label="3 lições disponíveis" className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-success px-1 text-[9px] font-bold text-white">3</span>
+                )}
               </div>
               <span className="text-[10px] font-medium">{item.label}</span>
             </NavLink>

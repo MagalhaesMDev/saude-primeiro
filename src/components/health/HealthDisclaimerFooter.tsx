@@ -2,7 +2,7 @@ import { AlertTriangle } from "lucide-react";
 
 export function HealthDisclaimerFooter() {
   return (
-    <footer className="border-t border-border bg-background py-6 px-4 mt-auto">
+    <footer className="mt-auto border-t border-border bg-inherit px-4 py-6">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-start gap-3 p-4 rounded-xl bg-warning/5 border border-warning/20">
           <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />

@@ -39,7 +39,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 pt-16">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-4 pb-8 pt-20">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -124,9 +124,9 @@ export default function LoginPage() {
           </p>
         </CardFooter>
       </Card>
-      <div className="mt-8 text-center text-xs text-muted-foreground">
+      <p className="w-full max-w-md text-center text-xs text-muted-foreground">
         Ao criar uma conta, você concorda com nossos Termos de Uso e Política de Privacidade.
-      </div>
-    </div>
+      </p>
+    </main>
   );
 }

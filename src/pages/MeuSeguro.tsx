@@ -1,143 +1,91 @@
-"use client";
-
-import { Shield, Star, Check, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { useState } from "react";
+import {
+  ArrowRight, Check, Clock3, Handshake, Heart, HeartHandshake, Hospital, ReceiptText, Shield,
+  ShieldAlert, Umbrella, UserRound, Wallet,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { HealthDisclaimerFooter } from "@/components/health/HealthDisclaimerFooter";
 import { formatCurrency } from "@/lib/utils";
 import { usePrototypeStore } from "@/store/prototypeStore";
-import { useState } from "react";
-import { HealthDisclaimerFooter } from "@/components/health/HealthDisclaimerFooter";
+
+const PLANS = [
+  {
+    name: "Essencial", price: 14.9, label: "Básico",
+    icon: Heart,
+    description: "Uma referência para comparar benefícios preventivos.",
+    features: ["Telemedicina (descrição ilustrativa)", "Descontos em farmácias (ilustrativos)", "Acidentes pessoais (consulte condições)", "Diária por internação (consulte condições)"],
+  },
+  {
+    name: "Proteção", price: 24.9, label: "Mais Escolhido", popular: true,
+    icon: Shield,
+    description: "Mais itens para comparar em uma simulação local.",
+    features: ["Itens do Essencial", "Incapacidade temporária (consulte condições)", "Auxílio funeral (consulte condições)", "Valores e limites dependem de contrato real"],
+  },
+  {
+    name: "Renda", price: 39.9, label: "Completo",
+    icon: Handshake,
+    description: "Uma opção ilustrativa com foco em proteção financeira.",
+    features: ["Itens do Proteção", "Proteção financeira da renda (ilustrativa)", "Compare exclusões, limites e carências", "Nenhuma apólice é emitida neste protótipo"],
+  },
+];
+
+const COVERAGES = [
+  { title: "Acidentes pessoais", icon: ShieldAlert, text: "Exemplo: confira no contrato quais acidentes, limites e documentos seriam considerados." },
+  { title: "Diária por internação", icon: Hospital, text: "Exemplo: verifique número máximo de diárias, carência e critérios de internação." },
+  { title: "Incapacidade temporária", icon: Clock3, text: "Exemplo: entenda como a apólice define afastamento, comprovação e período de cobertura." },
+  { title: "Auxílio funeral", icon: HeartHandshake, text: "Exemplo: confirme serviços, limites e quem pode ser incluído antes de contratar." },
+];
 
 export default function MeuSeguroPage() {
   const { selectedPlan, selectPlan, claims, requestBenefit } = usePrototypeStore();
   const [benefitDescription, setBenefitDescription] = useState("");
-  const plans = [
-    {
-      name: "Essencial",
-      price: 14.90,
-      type: "Básico",
-      description: "Cobertura básica para você e sua família",
-      features: ["Telemedicina 24h", "Descontos em farmácias", "Consulta online", "Acidentes pessoais", "Diária por internação"],
-      badge: "Básico",
-      popular: false,
-    },
-    {
-      name: "Proteção",
-      price: 24.90,
-      type: "Intermediário",
-      description: "Cobertura completa com mais benefícios",
-      features: ["Telemedicina 24h", "Descontos em farmácias", "Consulta online", "Diária por internação", "Incapacidade temporária", "Auxílio funeral"],
-      badge: "Intermediário",
-      popular: true,
-    },
-    {
-      name: "Renda",
-      price: 39.90,
-      type: "Completo",
-      description: "Proteção completa com garantia de renda",
-      features: ["Telemedicina 24h", "Descontos em farmácias", "Consulta online", "Diária por internação", "Incapacidade temporária", "Auxílio funeral", "Proteção financeira da renda"],
-      badge: "Completo",
-      popular: false,
-    },
-  ];
+  const [requestMessage, setRequestMessage] = useState("");
+
+  const submitRequest = () => {
+    if (!benefitDescription.trim()) return;
+    requestBenefit(benefitDescription.trim());
+    setBenefitDescription("");
+    setRequestMessage("Solicitação de demonstração registrada apenas neste navegador; nada foi enviado à seguradora.");
+  };
 
   return (
-    <div className="min-h-screen bg-background pt-16 pb-24">
-      {/* Header da seção */}
-      <section className="px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-2 mb-2">
-            <Shield className="w-5 h-5 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Meu Seguro</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Escolha o plano que melhor cabe no seu bolso e proteja quem você ama.
-          </p>
+    <main className="min-h-screen bg-background pb-28 pt-16">
+      <section className="px-4 pb-5 pt-7">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /><h1 className="text-2xl font-bold">Meu Seguro</h1></div>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">Compare conceitos de cobertura e conheça as opções demonstrativas.</p>
         </div>
       </section>
 
-      <section className="px-4">
-        <div className="max-w-2xl mx-auto">
-          <Card className="border-warning/30 bg-warning/5 p-4">
-            <CardContent className="p-0 text-sm text-muted-foreground">
-              <strong className="text-foreground">Demonstração:</strong> valores e coberturas são ilustrativos. Este protótipo não vende seguro, não confirma elegibilidade e não envia solicitações a uma seguradora.
-            </CardContent>
-          </Card>
+      <section className="px-4 pb-4">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 rounded-xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-primary">
+          <Shield className="h-5 w-5 shrink-0" /><span><strong>Valores, coberturas e selos ilustrativos.</strong> Este protótipo não vende seguro nem confirma elegibilidade.</span>
         </div>
       </section>
 
-      {/* Planos */}
-      <section className="px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-lg font-bold text-foreground mb-6">
-            Escolha seu plano
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {plans.map((plan) => (
-              <Card key={plan.name} className={cn(
-                "relative p-6 hover:shadow-md transition-shadow",
-                plan.popular ? "border-primary ring-2 ring-primary" : "border-border"
-              )}>
-                {plan.badge && (
-                  <Badge variant="success" className="absolute -top-3 right-4 text-[10px]">
-                    {plan.badge}
-                  </Badge>
-                )}
-                <CardHeader>
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <CardDescription className="text-sm">{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-baseline mb-4">
-                    <span className="text-3xl font-bold text-foreground">
-                      {formatCurrency(plan.price)}
-                    </span>
-                    <span className="text-sm text-muted-foreground ml-1">/mês</span>
+      <section className="px-4 py-4">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-lg font-bold">Escolha um plano para comparar</h2>
+          <div className="grid items-stretch gap-4 lg:grid-cols-3">
+            {PLANS.map((plan) => (
+              <Card key={plan.name} className={`relative overflow-hidden ${plan.popular ? "border-2 border-primary shadow-md lg:-translate-y-1" : ""}`}>
+                <CardContent className="flex h-full flex-col p-5">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${plan.popular ? "bg-primary text-white" : "bg-primary/10 text-primary"}`}><plan.icon className="h-6 w-6" aria-hidden="true" /></span>
+                    <Badge variant={plan.popular ? "success" : "secondary"}>{plan.label}</Badge>
                   </div>
-                  <ul className="space-y-2 mb-6">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-sm">
-                        <Check className="w-4 h-4 text-success" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
+                  <h3 className="text-xl font-bold">Plano {plan.name}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
+                  <div className="mt-3"><p className="whitespace-nowrap text-2xl font-bold">{formatCurrency(plan.price)}</p><p className="text-xs text-muted-foreground">/mês (simulado)</p></div>
+                  <ul className="flex-1 space-y-2 border-t py-4">
+                    {plan.features.map((feature) => <li key={feature} className="flex gap-2 text-sm"><Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-success" /><span>{feature}</span></li>)}
                   </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    variant="success"
-                    className="w-full"
-                    onClick={() => selectPlan(plan.name, plan.price)}
-                  >
-                    {selectedPlan?.name === plan.name ? "Plano selecionado" : "Escolher este plano"}
+                  <Button variant="success" className="w-full" onClick={() => selectPlan(plan.name, plan.price)}>
+                    {selectedPlan?.name === plan.name ? `${plan.name} selecionado para comparação` : `Escolher ${plan.name}`}
                   </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Por que confiar */}
-      <section className="px-4 py-8 bg-muted/50">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-lg font-bold text-foreground mb-6">
-            Por que confiar no Saúde Primeiro?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {[
-              { label: "Transparência", desc: "Sem letras miúdas, linguagem simples" },
-              { label: "Leia com clareza", desc: "Compare coberturas, exclusões, carências e limites" },
-              { label: "Sem contratação no protótipo", desc: "Nenhuma cobrança ou apólice é gerada" },
-            ].map((item) => (
-              <Card key={item.label} className="p-4 text-center">
-                <CardContent>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 bg-primary/10 text-primary">
-                    <Star className="w-5 h-5" />
-                  </div>
-                  <h4 className="font-semibold text-foreground">{item.label}</h4>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                  {selectedPlan?.name === plan.name && <p role="status" className="mt-2 text-center text-xs text-muted-foreground">Seleção local; nenhuma contratação foi realizada.</p>}
                 </CardContent>
               </Card>
             ))}
@@ -145,85 +93,84 @@ export default function MeuSeguroPage() {
         </div>
       </section>
 
-      {/* Acionar benefício */}
-      <section className="px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <Card className="p-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Precisa de apoio imediato?</CardTitle>
-              <CardDescription>
-                Registre uma solicitação demonstrativa neste dispositivo.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex flex-col gap-3">
-                <label htmlFor="benefit-description" className="text-sm font-medium">
-                  Descreva o benefício que deseja solicitar
-                </label>
-                <textarea
-                  id="benefit-description"
-                  value={benefitDescription}
-                  onChange={(event) => setBenefitDescription(event.target.value)}
-                  className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  placeholder="Ex.: diária por internação"
-                />
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  leftIcon={<RefreshCw className="w-4 h-4" />}
-                  disabled={!benefitDescription.trim()}
-                  onClick={() => {
-                    requestBenefit(benefitDescription.trim());
-                    setBenefitDescription("");
-                  }}
-                >
-                  Acionar benefício
-                </Button>
-                {claims.length > 0 && (
-                  <div aria-live="polite" className="rounded-md bg-muted p-3 text-sm">
-                    Solicitações de demonstração: {claims.length}. Nenhum pedido foi enviado à seguradora.
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground text-center">
-                  Demonstração local: não envie documentos ou dados pessoais.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+      <section className="px-4 py-6">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-lg font-bold">Por que confiar no Saúde Primeiro?</h2>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              { title: "Entenda as condições", text: "Confira fidelidade, carências e exclusões no contrato oficial.", icon: Shield },
+              { title: "Compare pagamentos", text: "Verifique opções, valores e regras diretamente com a seguradora.", icon: Wallet },
+              { title: "Escolha com informação", text: "Avalie cobertura e atendimento antes de tomar uma decisão.", icon: UserRound },
+            ].map(({ title, text, icon: Icon }) => <Card key={title}><CardContent className="p-4"><span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary"><Icon className="h-5 w-5" /></span><h3 className="font-semibold">{title}</h3><p className="mt-1 text-xs leading-5 text-muted-foreground">{text}</p></CardContent></Card>)}
+          </div>
+          <Card className="mt-4 border-primary/15 bg-primary/5"><CardContent className="p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-bold">O que outras pessoas poderiam dizer</h3><span className="font-semibold text-primary">4,9/5 (1.200 pessoas)*</span></div>
+            <p className="mb-3 mt-1 text-xs text-muted-foreground">Conteúdo inteiramente fictício para demonstração; não representa avaliações reais.</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <blockquote className="rounded-xl bg-card p-3 text-sm">“Consegui entender melhor o que preciso comparar antes de escolher.”<footer className="mt-2 text-xs text-muted-foreground">— Joana, depoimento fictício</footer></blockquote>
+              <blockquote className="rounded-xl bg-card p-3 text-sm">“A linguagem direta ajudou minha família a conversar sobre proteção.”<footer className="mt-2 text-xs text-muted-foreground">— Rafael, depoimento fictício</footer></blockquote>
+            </div>
+          </CardContent></Card>
         </div>
       </section>
 
-      {/* Passo a passo */}
-      <section className="px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-lg font-bold text-foreground mb-6">
-            Como acionar seu seguro
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section id="acionar-beneficio" className="px-4 py-5">
+        <Card className="mx-auto max-w-6xl border-success/20">
+          <CardContent className="p-5">
+            <h2 className="text-lg font-bold">Precisa de apoio imediato?</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Experimente o formulário local de acionamento demonstrativo.</p>
+            <label htmlFor="benefit-description" className="mb-2 mt-4 block text-sm font-medium">Descreva o benefício que deseja solicitar</label>
+            <textarea id="benefit-description" value={benefitDescription} onChange={(event) => setBenefitDescription(event.target.value)} className="min-h-24 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm" placeholder="Ex.: exemplo para diária por internação" />
+            <Button variant="success" className="mt-3 w-full" disabled={!benefitDescription.trim()} onClick={submitRequest}>Abrir sinistro / Acionar benefício</Button>
+            {requestMessage && <p role="status" className="mt-3 rounded-lg bg-success/10 p-3 text-sm text-success">{requestMessage}</p>}
+            {claims.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Solicitações demonstrativas guardadas localmente: {claims.length}.</p>}
+            <p className="mt-3 text-center text-xs text-muted-foreground">Não envie dados pessoais ou documentos. Nenhum pedido é transmitido.</p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="px-4 py-5">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-lg font-bold">Passo a passo simples (3 etapas)</h2>
+          <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { step: 1, title: "Compare as condições", desc: "Verifique limites, carências, exclusões e preço no contrato oficial" },
-              { step: 2, title: "Confirme com a seguradora", desc: "Use os canais oficiais para validar cobertura e elegibilidade" },
-              { step: 3, title: "Siga as orientações oficiais", desc: "Prazos e documentos dependem da apólice e da análise do pedido" },
-            ].map((item) => (
-              <Card key={item.step} className="p-6 text-center">
-                <CardContent>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 bg-primary text-primary-foreground">
-                    <span className="font-bold">{item.step}</span>
-                  </div>
-                  <h4 className="font-semibold text-foreground">{item.title}</h4>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+              { title: "Descreva o que houve", text: "Registre informações solicitadas pelos canais oficiais." },
+              { title: "Anexe fotos e recibos", text: "Envie documentos somente pela plataforma oficial da seguradora." },
+              { title: "Acompanhe o pedido", text: "Consulte o andamento e prazos nos canais oficiais." },
+            ].map((step, index) => <Card key={step.title}><CardContent className="p-4"><span className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">{index + 1}</span><h3 className="font-semibold">{step.title}</h3><p className="mt-1 text-xs leading-5 text-muted-foreground">{step.text}</p></CardContent></Card>)}
+          </div>
+          <Button variant="outline" className="mt-4 w-full" onClick={() => document.getElementById("benefit-description")?.focus()}>Iniciar acionamento (teste) <ArrowRight className="ml-2 h-4 w-4" /></Button>
+        </div>
+      </section>
+
+      <section className="px-4 py-5">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-lg font-bold">O que cada cobertura significa no seu dia a dia</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {COVERAGES.map(({ title, text, icon: Icon }) => <Card key={title}><CardContent className="flex gap-3 p-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></span><div><h3 className="font-semibold">{title}</h3><p className="mt-1 text-xs leading-5 text-muted-foreground">{text}</p></div></CardContent></Card>)}
           </div>
         </div>
       </section>
 
+      <section className="px-4 py-5">
+        <Card className="mx-auto max-w-6xl"><CardContent className="p-5">
+          <div className="flex items-center justify-between gap-2"><h2 className="text-lg font-bold">Meu histórico</h2><Badge variant="secondary">Índice de Proteção Inclusiva*</Badge></div>
+          <p className="mb-4 mt-1 text-xs text-muted-foreground">Linha do tempo meramente ilustrativa; não há apólice nem cálculo individual.</p>
+          <ol className="relative ml-2 space-y-4 border-l-2 border-primary/20 pl-5">
+            {[["1 mês", "Conheça os conceitos de coberturas e carências."], ["3 meses", "Revise suas prioridades e compare opções oficiais."], ["12 meses", "Reavalie se os benefícios continuam adequados." ]].map(([time, text]) => <li key={time} className="relative"><span className="absolute -left-[1.65rem] top-1 h-3 w-3 rounded-full border-2 border-white bg-primary" /><p className="text-sm font-semibold">{time}</p><p className="text-xs text-muted-foreground">{text}</p></li>)}
+          </ol>
+        </CardContent></Card>
+      </section>
+
+      <section className="px-4 py-5">
+        <div className="mx-auto max-w-6xl"><h2 className="mb-4 text-lg font-bold">Benefícios futuros</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Card><CardContent className="flex items-start gap-3 p-4"><ReceiptText className="h-6 w-6 text-success" /><div><div className="flex items-center gap-2"><h3 className="font-semibold">Cashback preventivo</h3><Badge variant="mint">Em breve</Badge></div><p className="mt-1 text-xs text-muted-foreground">Ideia demonstrativa de incentivo a atividades educativas; sem valor em dinheiro.</p></div></CardContent></Card>
+            <Card><CardContent className="flex items-start gap-3 p-4"><Umbrella className="h-6 w-6 text-primary" /><div><div className="flex items-center gap-2"><h3 className="font-semibold">Proteção de longo prazo</h3><Badge variant="secondary">Conceito em estudo</Badge></div><p className="mt-1 text-xs text-muted-foreground">Não existe seguro vitalício garantido ou cobertura ativa neste protótipo.</p></div></CardContent></Card>
+          </div>
+        </div>
+      </section>
       <HealthDisclaimerFooter />
-    </div>
+    </main>
   );
-}
-
-function cn(...classes: (string | boolean | undefined)[]): string {
-  return classes.filter(Boolean).join(" ");
 }
