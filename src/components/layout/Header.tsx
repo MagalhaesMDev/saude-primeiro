@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { Shield, User, Menu, X } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Shield, User } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,9 +20,9 @@ interface HeaderProps {
 }
 
 export function Header({ className }: HeaderProps) {
-  const pathname = usePathname();
-  const { user, isLoading } = useAuthStore();
-  const sectionLabel = SECTION_LABELS[pathname] || "";
+  const location = useLocation();
+    const { user, isLoading } = useAuthStore();
+    const sectionLabel = SECTION_LABELS[location.pathname] || "";
 
   if (isLoading) return null;
 
