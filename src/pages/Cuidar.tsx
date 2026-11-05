@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/utils";
+import { HealthDisclaimerFooter } from "@/components/health/HealthDisclaimerFooter";
 
 const DAYS = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
 
@@ -260,8 +261,4 @@ export default function CuidarPage() {
       <HealthDisclaimerFooter />
     </div>
   );
-}
-
-function Heart({ className }: { className?: string }) {
-  return <heart className={className} />;
 }

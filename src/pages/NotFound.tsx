@@ -1,27 +1,27 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname,
-    );
-  }, [location.pathname]);
-
+export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 pt-16">
+      <Card className="w-full max-w-md text-center shadow-lg">
+        <CardHeader>
+          <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <Home className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <CardTitle className="text-2xl">Página não encontrada</CardTitle>
+          <CardDescription>
+            A página que você procura não existe.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="success" className="w-full" leftIcon={<ArrowLeft className="w-4 h-4" />}>
+            Voltar ao início
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default NotFound;
+}
