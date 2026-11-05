@@ -38,6 +38,8 @@ export default function App() {
           <Route path="/aprender" element={<AprenderPage />} />
           <Route path="/saude-feminina" element={<SaudeFemininaPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/cadastro" element={<LoginPage />} />
+          <Route path="/esqueci-senha" element={<LoginPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <BottomNav />

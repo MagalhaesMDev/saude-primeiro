@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,23 +15,27 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, setLoading } = useAuthStore();
+  const [notice, setNotice] = useState("");
+  const isRegister = location.pathname === "/cadastro";
+  const isRecovery = location.pathname === "/esqueci-senha";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isRecovery) {
+      setNotice("A recuperação de senha precisa de um serviço de e-mail configurado. Este protótipo não envia mensagens.");
+      return;
+    }
     setIsLoading(true);
     setLoading(true);
-
-    // Simular login
-    setTimeout(() => {
-      login(
-        { id: "1", email, name: "Usuário", role: "USER" },
-        "mock-token"
-      );
-      setIsLoading(false);
-      setLoading(false);
-      navigate("/");
-    }, 1000);
+    login(
+      { id: email.toLowerCase(), email, name: email.split("@")[0], role: "USER" },
+      "demo-session"
+    );
+    setIsLoading(false);
+    setLoading(false);
+    navigate("/");
   };
 
   return (
@@ -41,9 +45,13 @@ export default function LoginPage() {
           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
             <Shield className="w-6 h-6 text-white" />
           </div>
-          <CardTitle className="text-2xl">Bem-vindo de volta</CardTitle>
+          <CardTitle className="text-2xl">
+            {isRecovery ? "Recuperar senha" : isRegister ? "Criar conta de demonstração" : "Bem-vindo de volta"}
+          </CardTitle>
           <CardDescription>
-            Faça login para acessar sua conta do Saúde Primeiro
+            {isRecovery
+              ? "Informe seu e-mail para ver as opções disponíveis."
+              : "Acesse o protótipo usando qualquer e-mail e senha."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -59,7 +67,7 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
+            {!isRecovery && <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Senha</Label>
                 <button
@@ -78,8 +86,8 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-            </div>
-            <div className="flex items-center justify-between">
+            </div>}
+            {!isRecovery && <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" className="rounded border-gray-300 text-primary" />
                 Lembrar de mim
@@ -87,17 +95,18 @@ export default function LoginPage() {
               <Link to="/esqueci-senha" className="text-sm text-primary hover:underline">
                 Esqueci minha senha
               </Link>
-            </div>
+            </div>}
             <Button type="submit" variant="success" className="w-full" disabled={isLoading}>
-              {isLoading ? "Entrando..." : "Entrar"}
+              {isLoading ? "Aguarde..." : isRecovery ? "Continuar" : isRegister ? "Criar conta" : "Entrar"}
             </Button>
+            {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
           </form>
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
           <p className="text-sm text-center text-muted-foreground">
-            Não tem uma conta?{" "}
-            <Link to="/cadastro" className="text-primary font-medium hover:underline">
-              Cadastre-se
+            {isRegister ? "Já tem uma conta?" : "Não tem uma conta?"}{" "}
+            <Link to={isRegister ? "/login" : "/cadastro"} className="text-primary font-medium hover:underline">
+              {isRegister ? "Entrar" : "Cadastre-se"}
             </Link>
           </p>
           <div className="relative">
@@ -110,14 +119,9 @@ export default function LoginPage() {
               </span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="w-full">
-              Google
-            </Button>
-            <Button variant="outline" className="w-full">
-              Apple
-            </Button>
-          </div>
+          <p className="text-xs text-center text-muted-foreground">
+            Sessão de demonstração salva somente neste navegador. Não use dados reais.
+          </p>
         </CardFooter>
       </Card>
       <div className="mt-8 text-center text-xs text-muted-foreground">

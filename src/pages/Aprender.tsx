@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Shield, Medal, ArrowRight, Play, RefreshCw, Book, User, Percent } from "lucide-react";
+import { BookOpen, Shield, ArrowRight, Play, User, Heart as HeartIcon, Brain, Activity, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { HealthDisclaimerFooter } from "@/components/health/HealthDisclaimerFooter";
+import { usePrototypeStore } from "@/store/prototypeStore";
 
 const TRAILS = [
   {
@@ -17,9 +16,8 @@ const TRAILS = [
     category: "Entregadores e Autônomos",
     icon: <Shield className="w-5 h-5" />,
     color: "bg-primary/10 text-primary",
-    progress: "3/5 feitas",
-    time: "10 min restantes",
-    status: "in_progress",
+    description: "Prevenção prática para reduzir riscos durante a rotina de trabalho.",
+    time: "10 min",
     action: "Continuar",
   },
   {
@@ -28,10 +26,8 @@ const TRAILS = [
     category: "Saúde Feminina",
     icon: <User className="w-5 h-5" />,
     color: "bg-feminine/10 text-feminine",
-    progress: "0/5 feitas",
-    time: "10 min restantes",
-    status: "not_started",
-    action: "Iniciar",
+    description: "Conheça cuidados preventivos e sinais que merecem avaliação profissional.",
+    time: "10 min",
   },
   {
     id: 3,
@@ -39,32 +35,26 @@ const TRAILS = [
     category: "Saúde Masculina",
     icon: <Shield className="w-5 h-5" />,
     color: "bg-primary/10 text-primary",
-    progress: "0/5 feitas",
-    time: "10 min restantes",
-    status: "not_started",
-    action: "Iniciar",
+    description: "Informações gerais de prevenção e autocuidado ao longo da vida.",
+    time: "10 min",
   },
   {
     id: 4,
     title: "Cuidados com idosos e longevidade",
     category: "Família",
-    icon: <Heart className="w-5 h-5" />,
+    icon: <HeartIcon className="w-5 h-5" />,
     color: "bg-success/10 text-success",
-    progress: "0/5 feitas",
-    time: "10 min restantes",
-    status: "not_started",
-    action: "Iniciar",
+    description: "Orientações para apoiar o bem-estar e a autonomia de quem envelhece.",
+    time: "10 min",
   },
   {
     id: 5,
     title: "Saúde mental e estresse",
     category: "Bem-estar",
     icon: <Brain className="w-5 h-5" />,
-    color: "bg-purple/10 text-purple",
-    progress: "0/5 feitas",
-    time: "10 min restantes",
-    status: "not_started",
-    action: "Iniciar",
+    color: "bg-accent text-accent-foreground",
+    description: "Estratégias de bem-estar e caminhos para buscar apoio.",
+    time: "10 min",
   },
   {
     id: 6,
@@ -72,10 +62,8 @@ const TRAILS = [
     category: "Dia a Dia",
     icon: <Activity className="w-5 h-5" />,
     color: "bg-warning/10 text-warning",
-    progress: "0/5 feitas",
-    time: "10 min restantes",
-    status: "not_started",
-    action: "Iniciar",
+    description: "Hábitos de saúde possíveis para incluir na rotina.",
+    time: "10 min",
   },
   {
     id: 7,
@@ -83,10 +71,8 @@ const TRAILS = [
     category: "Seguros",
     icon: <FileText className="w-5 h-5" />,
     color: "bg-primary/10 text-primary",
-    progress: "0/5 feitas",
-    time: "10 min restantes",
-    status: "not_started",
-    action: "Iniciar",
+    description: "Entenda termos e conceitos comuns antes de avaliar um seguro.",
+    time: "10 min",
   },
 ];
 
@@ -100,6 +86,10 @@ const GLOSSARY = [
 
 export default function AprenderPage() {
   const [activeTab, setActiveTab] = useState("todos");
+  const { points, completedLessons, completeLesson, quizAnswered, quizCorrect, answerQuiz } = usePrototypeStore();
+  const visibleTrails = activeTab === "todos"
+    ? TRAILS
+    : TRAILS.filter((trail) => trail.category.toLowerCase() === activeTab);
 
   return (
     <div className="min-h-screen bg-background pt-16 pb-24">
@@ -124,23 +114,23 @@ export default function AprenderPage() {
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <h3 className="font-bold text-foreground">Seu nível</h3>
-                    <p className="text-sm text-muted-foreground">280 pts acumulados - Nível Bronze</p>
+                    <p className="text-sm text-muted-foreground">{points} pts acumulados - Nível {points >= 1500 ? "Ouro" : points >= 500 ? "Prata" : "Bronze"}</p>
                   </div>
-                  <Badge variant="success">Bronze</Badge>
+                  <Badge variant="success">{points >= 1500 ? "Ouro" : points >= 500 ? "Prata" : "Bronze"}</Badge>
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground mb-2">
                   <span>Bronze (0-499 pts)</span>
                   <span>Prata (500-1499 pts)</span>
                 </div>
-                <Progress value={56} className="h-3 mb-4" />
+                <Progress value={points < 500 ? (points / 500) * 100 : points < 1500 ? ((points - 500) / 1000) * 100 : 100} className="h-3 mb-4" />
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 rounded-xl bg-muted/50">
                     <p className="text-xs text-muted-foreground">Próximo benefício</p>
-                    <p className="text-sm font-semibold text-foreground">20% desconto farmácias</p>
+                    <p className="text-sm font-semibold text-foreground">{points < 500 ? "Desconto em farmácias (nível Prata)" : "Benefícios do nível atual"}</p>
                   </div>
                   <div className="p-3 rounded-xl bg-muted/50">
-                    <p className="text-xs text-muted-foreground">Faltam 120 pts</p>
-                    <p className="text-sm font-semibold text-foreground">para Prata</p>
+                    <p className="text-xs text-muted-foreground">Pontos até o próximo nível</p>
+                    <p className="text-sm font-semibold text-foreground">{Math.max((points < 500 ? 500 : points < 1500 ? 1500 : points) - points, 0)}</p>
                   </div>
                 </div>
                 <Button variant="outline" className="w-full mt-4" size="sm" leftIcon={<Play className="w-4 h-4" />}>
@@ -160,11 +150,11 @@ export default function AprenderPage() {
               <div className="flex justify-between items-center mb-4">
                 <div>
                   <h4 className="font-bold text-foreground">Aprendizado consciente</h4>
-                  <p className="text-sm text-muted-foreground">Limite diário de 100 pts</p>
+                  <p className="text-sm text-muted-foreground">Atividades concluídas no protótipo</p>
                 </div>
-                <span className="text-sm font-bold text-primary">25/100 hoje</span>
+                <span className="text-sm font-bold text-primary">{completedLessons.length} lições</span>
               </div>
-              <Progress value={25} className="h-2" />
+              <Progress value={Math.min(completedLessons.length * 20, 100)} className="h-2" />
             </CardContent>
           </Card>
         </div>
@@ -175,7 +165,7 @@ export default function AprenderPage() {
         <div className="max-w-2xl mx-auto">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {["Todos", "Entregadores e Autônomos", "Saúde Feminina", "Saúde Masculina", "Família", "Bem-estar", "Dia a Dia", "Seguros"].map((theme) => (
-              <button key={theme} onClick={() => setActiveTab(theme.toLowerCase())} className="px-4 py-2 rounded-full text-sm font-medium transition-all border">
+              <button key={theme} onClick={() => setActiveTab(theme.toLowerCase())} aria-pressed={activeTab === theme.toLowerCase()} className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${activeTab === theme.toLowerCase() ? "bg-primary text-primary-foreground" : ""}`}>
                 {theme}
               </button>
             ))}
@@ -201,10 +191,10 @@ export default function AprenderPage() {
                 </div>
                 <div className="space-y-3">
                   {[
-                    "1. Mochila moída: graxe o cadeado e o fecho para evitar que a alça arrebente.",
-                    "2. Postura ao erguer peso: flexione os joelhos e proteja a coluna.",
-                    "3. Calçado adequado: use sapato antiderrapante e biqueira.",
-                    "4. Pausa para alongar: alongue braços e punhos a cada 2 horas.",
+                    "1. Ajuste a mochila: distribua o peso e confira se as alças e os fechos estão em boas condições.",
+                    "2. Ao erguer volumes, aproxime a carga do corpo e evite movimentos bruscos.",
+                    "3. Use calçado confortável e adequado às condições do local de trabalho.",
+                    "4. Faça pausas quando possível e alterne tarefas repetitivas.",
                   ].map((step, i) => (
                     <div key={i} className="flex gap-3">
                       <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -214,8 +204,14 @@ export default function AprenderPage() {
                     </div>
                   ))}
                 </div>
-                <Button variant="success" className="w-full mt-6" leftIcon={<ArrowRight className="w-4 h-4" />}>
-                  Começar lição
+                <Button
+                  variant="success"
+                  className="w-full mt-6"
+                  leftIcon={<ArrowRight className="w-4 h-4" />}
+                  disabled={completedLessons.includes("Como se proteger contra quedas e lesões no trabalho")}
+                  onClick={() => completeLesson("Como se proteger contra quedas e lesões no trabalho")}
+                >
+                  {completedLessons.includes("Como se proteger contra quedas e lesões no trabalho") ? "Lição concluída" : "Concluir lição (+10 pts)"}
                 </Button>
               </div>
             </CardContent>
@@ -231,7 +227,7 @@ export default function AprenderPage() {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h4 className="font-bold text-foreground">Quiz rápido</h4>
-                  <Badge variant="success">+10 pts + R$ 0,20</Badge>
+                  <Badge variant="success">{quizAnswered ? "Respondido" : "+10 pts"}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
                   O que significa "carência" em um seguro?
@@ -242,11 +238,16 @@ export default function AprenderPage() {
                     "Valor pago mensalmente pelo plano",
                     "Documento que formaliza o contrato",
                   ].map((opt, i) => (
-                    <button key={i} onClick={() => {}} className="w-full text-left px-4 py-3 rounded-xl border border-border text-sm text-left hover:bg-muted transition-colors">
+                    <button key={i} disabled={quizAnswered} onClick={() => {
+                      const correct = i === 0;
+                      answerQuiz(correct);
+                    }} className="w-full text-left px-4 py-3 rounded-xl border border-border text-sm hover:bg-muted transition-colors disabled:opacity-70">
                       {opt}
                     </button>
                   ))}
                 </div>
+                {quizCorrect !== null && <p role="status" className="mt-3 text-sm">{quizCorrect ? "Correto! Os pontos foram salvos neste navegador." : "A resposta correta é o período de espera antes de usar alguns benefícios."}</p>}
+                {quizAnswered && quizCorrect === null && <p role="status" className="mt-3 text-sm">Quiz já respondido antes desta atualização. A resposta correta é o período de espera antes de usar alguns benefícios.</p>}
               </div>
             </CardContent>
           </Card>
@@ -258,7 +259,9 @@ export default function AprenderPage() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-lg font-bold text-foreground mb-6">Trilhas de Aprendizado</h2>
           <div className="space-y-4">
-            {TRAILS.map((trail) => (
+            {visibleTrails.map((trail) => {
+              const isCompleted = completedLessons.includes(trail.title);
+              return (
               <Card key={trail.id} className="p-4">
                 <CardContent>
                   <div className="flex justify-between items-start mb-3">
@@ -274,19 +277,23 @@ export default function AprenderPage() {
                     <Badge variant="success" className="text-[10px]">100% Grátis</Badge>
                   </div>
                   <div className="flex justify-between items-center mb-3 text-xs text-muted-foreground">
-                    <span>{trail.progress}</span>
+                    <span>{isCompleted ? "Atividade concluída" : "Disponível"}</span>
                     <span>{trail.time}</span>
                   </div>
+                  <p className="mb-3 text-xs text-muted-foreground">{trail.description}</p>
                   <Button
-                    variant={trail.status === "in_progress" ? "outline" : "success"}
+                    variant="success"
                     className="w-full"
                     size="sm"
+                    disabled={isCompleted}
+                    onClick={() => completeLesson(trail.title)}
                   >
-                    {trail.action}
+                    {isCompleted ? "Concluída (+10 pts)" : "Concluir atividade (+10 pts)"}
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -311,22 +318,6 @@ export default function AprenderPage() {
   );
 }
 
-function Heart({ className }: { className?: string }) {
-  return <heart className={className} />;
-}
-
-function Brain({ className }: { className?: string }) {
-  return <brain className={className} />;
-}
-
-function Activity({ className }: { className?: string }) {
-  return <activity className={className} />;
-}
-
-function FileText({ className }: { className?: string }) {
-  return <file-text className={className} />;
-}
-
 function HealthDisclaimerFooter() {
   return (
     <footer className="border-t border-border bg-background py-6 px-4 mt-auto">
@@ -335,7 +326,7 @@ function HealthDisclaimerFooter() {
           <div className="w-5 h-5 text-warning shrink-0 mt-0.5">⚠</div>
           <div className="text-sm text-muted-foreground">
             <p className="font-semibold text-foreground mb-1">Aviso importante</p>
-            <p>O conteúdo deste app é educativo e não substitui consulta médica. Em caso de emergência, ligue para <a href="tel:192" className="font-semibold text-success hover:underline">SAMU 192</a> ou procure a <a href="#" className="font-semibold text-success hover:underline">UPA</a> mais próxima.</p>
+            <p>O conteúdo deste app é educativo e não substitui consulta médica. Em caso de emergência, ligue para <a href="tel:192" className="font-semibold text-success hover:underline">SAMU 192</a> ou procure a UPA mais próxima.</p>
           </div>
         </div>
       </div>

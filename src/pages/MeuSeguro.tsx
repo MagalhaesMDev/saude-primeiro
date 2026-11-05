@@ -1,12 +1,17 @@
 "use client";
 
-import { Shield, Star, Check, Clock, FileText, CreditCard, RefreshCw } from "lucide-react";
+import { Shield, Star, Check, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { usePrototypeStore } from "@/store/prototypeStore";
+import { useState } from "react";
+import { HealthDisclaimerFooter } from "@/components/health/HealthDisclaimerFooter";
 
 export default function MeuSeguroPage() {
+  const { selectedPlan, selectPlan, claims, requestBenefit } = usePrototypeStore();
+  const [benefitDescription, setBenefitDescription] = useState("");
   const plans = [
     {
       name: "Essencial",
@@ -14,7 +19,7 @@ export default function MeuSeguroPage() {
       type: "Básico",
       description: "Cobertura básica para você e sua família",
       features: ["Telemedicina 24h", "Descontos em farmácias", "Consulta online", "Acidentes pessoais", "Diária por internação"],
-      badge: null,
+      badge: "Básico",
       popular: false,
     },
     {
@@ -23,7 +28,7 @@ export default function MeuSeguroPage() {
       type: "Intermediário",
       description: "Cobertura completa com mais benefícios",
       features: ["Telemedicina 24h", "Descontos em farmácias", "Consulta online", "Diária por internação", "Incapacidade temporária", "Auxílio funeral"],
-      badge: "Mais escolhido",
+      badge: "Intermediário",
       popular: true,
     },
     {
@@ -32,7 +37,7 @@ export default function MeuSeguroPage() {
       type: "Completo",
       description: "Proteção completa com garantia de renda",
       features: ["Telemedicina 24h", "Descontos em farmácias", "Consulta online", "Diária por internação", "Incapacidade temporária", "Auxílio funeral", "Proteção financeira da renda"],
-      badge: "Completo & Renda",
+      badge: "Completo",
       popular: false,
     },
   ];
@@ -49,6 +54,16 @@ export default function MeuSeguroPage() {
           <p className="text-muted-foreground">
             Escolha o plano que melhor cabe no seu bolso e proteja quem você ama.
           </p>
+        </div>
+      </section>
+
+      <section className="px-4">
+        <div className="max-w-2xl mx-auto">
+          <Card className="border-warning/30 bg-warning/5 p-4">
+            <CardContent className="p-0 text-sm text-muted-foreground">
+              <strong className="text-foreground">Demonstração:</strong> valores e coberturas são ilustrativos. Este protótipo não vende seguro, não confirma elegibilidade e não envia solicitações a uma seguradora.
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -90,8 +105,12 @@ export default function MeuSeguroPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="success" className="w-full">
-                    Escolher este plano
+                  <Button
+                    variant="success"
+                    className="w-full"
+                    onClick={() => selectPlan(plan.name, plan.price)}
+                  >
+                    {selectedPlan?.name === plan.name ? "Plano selecionado" : "Escolher este plano"}
                   </Button>
                 </CardFooter>
               </Card>
@@ -109,8 +128,8 @@ export default function MeuSeguroPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {[
               { label: "Transparência", desc: "Sem letras miúdas, linguagem simples" },
-              { label: "Aprovado por usuários", desc: "4,9/5 de mais de 10.000 avaliações" },
-              { label: "Pagamento fácil", desc: "Pix, cartão ou boleto" },
+              { label: "Leia com clareza", desc: "Compare coberturas, exclusões, carências e limites" },
+              { label: "Sem contratação no protótipo", desc: "Nenhuma cobrança ou apólice é gerada" },
             ].map((item) => (
               <Card key={item.label} className="p-4 text-center">
                 <CardContent>
@@ -133,16 +152,40 @@ export default function MeuSeguroPage() {
             <CardHeader>
               <CardTitle className="text-lg">Precisa de apoio imediato?</CardTitle>
               <CardDescription>
-                Acione seu benefício com autenticação simples e rápida.
+                Registre uma solicitação demonstrativa neste dispositivo.
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex flex-col gap-3">
-                <Button variant="outline" className="w-full" leftIcon={<RefreshCw className="w-4 h-4" />}>
+                <label htmlFor="benefit-description" className="text-sm font-medium">
+                  Descreva o benefício que deseja solicitar
+                </label>
+                <textarea
+                  id="benefit-description"
+                  value={benefitDescription}
+                  onChange={(event) => setBenefitDescription(event.target.value)}
+                  className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  placeholder="Ex.: diária por internação"
+                />
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  leftIcon={<RefreshCw className="w-4 h-4" />}
+                  disabled={!benefitDescription.trim()}
+                  onClick={() => {
+                    requestBenefit(benefitDescription.trim());
+                    setBenefitDescription("");
+                  }}
+                >
                   Acionar benefício
                 </Button>
+                {claims.length > 0 && (
+                  <div aria-live="polite" className="rounded-md bg-muted p-3 text-sm">
+                    Solicitações de demonstração: {claims.length}. Nenhum pedido foi enviado à seguradora.
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground text-center">
-                  Você precisará autenticar com CPF e senha para prosseguir.
+                  Demonstração local: não envie documentos ou dados pessoais.
                 </p>
               </div>
             </CardContent>
@@ -158,9 +201,9 @@ export default function MeuSeguroPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { step: 1, title: "Abra um chamado", desc: "Informe o ocorrido pelo app" },
-              { step: 2, title: "Envie documentos", desc: "Fotos e laudos médicos" },
-              { step: 3, title: "Receba o benefício", desc: "Pagamento em até 5 dias úteis" },
+              { step: 1, title: "Compare as condições", desc: "Verifique limites, carências, exclusões e preço no contrato oficial" },
+              { step: 2, title: "Confirme com a seguradora", desc: "Use os canais oficiais para validar cobertura e elegibilidade" },
+              { step: 3, title: "Siga as orientações oficiais", desc: "Prazos e documentos dependem da apólice e da análise do pedido" },
             ].map((item) => (
               <Card key={item.step} className="p-6 text-center">
                 <CardContent>

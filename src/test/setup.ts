@@ -17,9 +17,9 @@ Object.defineProperty(window, "matchMedia", {
 
 // Mock do localStorage
 const localStorageMock = {
-  getItem: (key: string) => null,
-  setItem: (key: string, value: string) => {},
-  removeItem: (key: string) => {},
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
   clear: () => {},
 };
 

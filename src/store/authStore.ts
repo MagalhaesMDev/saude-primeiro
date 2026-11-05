@@ -39,6 +39,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "saude-primeiro-auth",
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setLoading(false);
+      },
     }
   )
 );

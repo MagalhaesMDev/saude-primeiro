@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CheckCircle, Clock, Shield, Heart, Rocket } from "lucide-react";
+import { ArrowRight, CheckCircle, Shield, Heart, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { Link, useNavigate } from "react-router-dom";
+import { HealthDisclaimerFooter } from "@/components/health/HealthDisclaimerFooter";
+import { usePrototypeStore } from "@/store/prototypeStore";
 
 function cn(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
@@ -15,6 +18,9 @@ function cn(...classes: (string | boolean | undefined)[]): string {
 export default function IndexPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const { points, reminders, completeReminder, cashbackRedeemedCount, redeemCashback } = usePrototypeStore();
+  const navigate = useNavigate();
+  const cashbackAvailable = Math.max(Math.floor(points / 50) - cashbackRedeemedCount, 0);
 
   const questions = [
     {
@@ -45,12 +51,11 @@ export default function IndexPage() {
     },
   ];
 
-  const recommendedPlan = {
-    name: "Plano Essencial",
-    price: 14.90,
-    badge: "Melhor custo-benefício",
-    description: "Cobertura básica com telemedicina 24h e descontos em farmácias",
-  };
+  const recommendedPlan = answers.budget === "30plus"
+    ? { name: "Plano Renda", price: 39.90, badge: "Mais cobertura", description: "Coberturas ampliadas, conforme condições do plano." }
+    : answers.concern === "internacao" && answers.budget === "30"
+      ? { name: "Plano Proteção", price: 24.90, badge: "Recomendado", description: "Mais benefícios de proteção dentro do orçamento informado." }
+      : { name: "Plano Essencial", price: 14.90, badge: "Mais acessível", description: "Cobertura básica com telemedicina e descontos, conforme condições do plano." };
 
   const handleSelect = (value: string) => {
     setAnswers({ ...answers, [questions[step].id]: value });
@@ -80,7 +85,7 @@ export default function IndexPage() {
             Cuidados médicos preventivos rápidos no celular e amparo financeiro
             justo para você que é quem mais ama trabalhar sem sobressaltos.
           </p>
-          <Button variant="success" size="lg" className="w-full md:w-auto">
+          <Button variant="success" size="lg" className="w-full md:w-auto" onClick={() => navigate("/meu-seguro")}>
             Ver planos <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </div>
@@ -160,8 +165,10 @@ export default function IndexPage() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
-                    <Button variant="success" className="w-full">
-                      Contratar este plano
+                    <Button asChild variant="success" className="w-full">
+                      <Link to="/meu-seguro">
+                        Ver e selecionar plano
+                      </Link>
                     </Button>
                     <Button variant="outline" className="w-full" onClick={handleReset}>
                       Ver alternativa
@@ -182,18 +189,20 @@ export default function IndexPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { label: "Consultar um médico", icon: <Heart className="w-5 h-5" />, color: "bg-primary/10 text-primary" },
-              { label: "Aprender a me prevenir", icon: <Rocket className="w-5 h-5" />, color: "bg-success/10 text-success" },
-              { label: "Entender meu seguro", icon: <Shield className="w-5 h-5" />, color: "bg-muted text-foreground" },
+              { label: "Consultar um médico", href: "/cuidar", icon: <Heart className="w-5 h-5" />, color: "bg-primary/10 text-primary" },
+              { label: "Aprender a me prevenir", href: "/aprender", icon: <Rocket className="w-5 h-5" />, color: "bg-success/10 text-success" },
+              { label: "Entender meu seguro", href: "/meu-seguro", icon: <Shield className="w-5 h-5" />, color: "bg-muted text-foreground" },
             ].map((item) => (
-              <Card key={item.label} className="cursor-pointer hover:shadow-md transition-shadow">
+              <Link key={item.label} to={item.href} className="block">
+              <Card className="cursor-pointer hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 {item.color}">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${item.color}`}>
                     {item.icon}
                   </div>
                   <h3 className="font-semibold text-foreground">{item.label}</h3>
                 </CardContent>
               </Card>
+              </Link>
             ))}
           </div>
         </div>
@@ -207,9 +216,9 @@ export default function IndexPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-foreground">Seu progresso</h3>
-                  <p className="text-sm text-muted-foreground">280 pts acumulados - Nível Bronze</p>
+                  <p className="text-sm text-muted-foreground">{points} pts de demonstração</p>
                 </div>
-                <Badge variant="success">+10 pts hoje</Badge>
+                <Badge variant="success">Pontos de demonstração</Badge>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
@@ -217,13 +226,13 @@ export default function IndexPage() {
                 <span>Bronze</span>
                 <span>Prata</span>
               </div>
-              <Progress value={56} className="h-3" />
+              <Progress value={Math.min((points / 500) * 100, 100)} className="h-3" />
               <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>Faltam 120 pts para Prata</span>
-                <span>Benefício: 20% de desconto em farmácias</span>
+                <span>Faltam {Math.max(500 - points, 0)} pts para Prata</span>
+                <span>Benefícios ilustrativos, não disponíveis para resgate</span>
               </div>
-              <Button variant="outline" className="w-full mt-4" size="sm">
-                Continuar lição
+              <Button asChild variant="outline" className="w-full mt-4" size="sm">
+                <Link to="/aprender">Continuar lição</Link>
               </Button>
             </CardContent>
           </Card>
@@ -240,14 +249,14 @@ export default function IndexPage() {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex items-baseline justify-between mb-6">
-                <span className="text-4xl font-bold text-foreground">R$ 5,00</span>
-                <Badge variant="mint">Resgatável</Badge>
+                <span className="text-4xl font-bold text-foreground">{formatCurrency(cashbackAvailable)}</span>
+                <Badge variant="mint">Simulação</Badge>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                R$ 1 a cada 50 pts acumulados
+                R$ 1,00 simulado a cada 50 pontos. Não há pagamento real.
               </p>
-              <Button variant="success" className="w-full">
-                Resgatar
+              <Button variant="success" className="w-full" disabled={cashbackAvailable < 1} onClick={redeemCashback}>
+                {cashbackAvailable > 0 ? "Registrar resgate demonstrativo" : "Acumule 50 pontos para simular"}
               </Button>
             </CardContent>
           </Card>
@@ -261,25 +270,27 @@ export default function IndexPage() {
             Próximos lembretes de saúde
           </h2>
           <div className="space-y-3">
-            {[
-              { title: "Vacina da gripe (Anual)", time: "15 de Maio de 2026, 14:00", type: "Prevenção" },
-              { title: "Check-up de pressão arterial", time: "22 de Maio de 2026, 08:00", type: "Exame" },
-            ].map((reminder) => (
-              <Card key={reminder.title} className="p-4">
+            {reminders.filter((reminder) => !reminder.done).slice(0, 3).map((reminder) => (
+              <Card key={reminder.id} className="p-4">
                 <CardContent>
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-semibold text-foreground">{reminder.title}</h4>
-                      <p className="text-xs text-muted-foreground">{reminder.time}</p>
+                      <p className="text-xs text-muted-foreground">{formatDateTime(reminder.scheduledAt)}</p>
                     </div>
-                    <Badge variant="primary" className="text-[10px]">{reminder.type}</Badge>
+                    <Badge variant="default" className="text-[10px]">{reminder.type}</Badge>
                   </div>
-                  <Button variant="outline" size="sm" className="mt-3 w-auto">
+                  <Button variant="outline" size="sm" className="mt-3 w-auto" onClick={() => completeReminder(reminder.id)}>
                     Marcar como feito
                   </Button>
                 </CardContent>
               </Card>
             ))}
+            {reminders.filter((reminder) => !reminder.done).length === 0 && (
+              <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                Você ainda não tem lembretes pendentes. Adicione um em Cuidar de Mim.
+              </p>
+            )}
           </div>
         </div>
       </section>

@@ -1,23 +1,89 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Heart, Calendar, Droplets, Activity, Moon, Sun, Clock, Phone, ArrowRight } from "lucide-react";
+import { Shield, Phone, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Doughnut } from "recharts";
+import { Cell, Pie, PieChart } from "recharts";
+import { usePrototypeStore } from "@/store/prototypeStore";
 
 const PHASES = [
-  { name: "Menstrual", color: "#EF4444", percent: 25 },
-  { name: "Folicular", color: "#3B82F6", percent: 25 },
-  { name: "Ovulação", color: "#10B981", percent: 25 },
-  { name: "Lútea", color: "#F59E0B", percent: 25 },
+  {
+    name: "Menstrual",
+    color: "#EF4444",
+    percent: 18,
+    body: "O útero elimina o revestimento interno, causando o sangramento. Cólicas e cansaço podem acontecer.",
+    care: "Descanse quando puder e mantenha hidratação. Calor local pode aliviar cólicas leves.",
+  },
+  {
+    name: "Folicular",
+    color: "#3B82F6",
+    percent: 32,
+    body: "Começa junto com a menstruação. Um folículo amadurece e o revestimento do útero volta a se formar.",
+    care: "Observe como sua energia e disposição variam; cada pessoa sente essa fase de um jeito.",
+  },
+  {
+    name: "Ovulação",
+    color: "#10B981",
+    percent: 7,
+    body: "A liberação do óvulo ocorre perto do meio do ciclo em algumas pessoas, mas o dia pode variar.",
+    care: "A previsão do aplicativo não confirma ovulação nem deve ser usada como método contraceptivo.",
+  },
+  {
+    name: "Lútea",
+    color: "#F59E0B",
+    percent: 43,
+    body: "Após a ovulação, o corpo se prepara para um possível início de gravidez. Se ela não acontece, um novo ciclo começa.",
+    care: "Mudanças de humor, apetite ou sensibilidade podem ocorrer. Registre padrões e converse com um profissional.",
+  },
 ];
 
 export default function SaudeFemininaPage() {
-  const [activeTab, setActiveTab] = useState("fases");
+  const [activeTab, setActiveTab] = useState("menstrual");
+  const [mood, setMood] = useState("");
+  const [symptoms, setSymptoms] = useState<string[]>([]);
+  const [flow, setFlow] = useState("");
+  const [energy, setEnergy] = useState("");
+  const [savedMessage, setSavedMessage] = useState("");
+  const { cycleLogs, saveCycleLog, cycleStartDate, cycleLength, setCycleSettings } = usePrototypeStore();
+  const localToday = new Date();
+  localToday.setHours(0, 0, 0, 0);
+  const parsedStart = cycleStartDate ? new Date(`${cycleStartDate}T00:00:00`) : null;
+  const elapsedDays = parsedStart && !Number.isNaN(parsedStart.getTime()) && parsedStart <= localToday
+    ? Math.floor((localToday.getTime() - parsedStart.getTime()) / 86400000)
+    : null;
+  const cycleDay = elapsedDays === null ? null : (elapsedDays % cycleLength) + 1;
+  const daysUntilNextPeriod = elapsedDays === null ? null : cycleLength - (elapsedDays % cycleLength);
+  const nextPeriodDate = daysUntilNextPeriod === null
+    ? null
+    : new Date(localToday.getTime() + daysUntilNextPeriod * 86400000);
+  const ovulationDay = Math.max(cycleLength - 14, 6);
+  const currentPhase = cycleDay === null
+    ? null
+    : cycleDay <= 5
+      ? "Menstrual"
+      : cycleDay < ovulationDay
+        ? "Folicular"
+        : cycleDay === ovulationDay
+          ? "Ovulação"
+          : "Lútea";
+  const viewedMonth = new Date(localToday.getFullYear(), localToday.getMonth(), 1);
+  const calendarDays: Array<number | null> = [
+    ...Array.from({ length: viewedMonth.getDay() }, () => null),
+    ...Array.from(
+      { length: new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() + 1, 0).getDate() },
+      (_, index) => index + 1
+    ),
+  ];
+  const todayWeekday = localToday.getDay();
+  const todayLog = cycleLogs.find((log) => log.date === [
+    localToday.getFullYear(),
+    String(localToday.getMonth() + 1).padStart(2, "0"),
+    String(localToday.getDate()).padStart(2, "0"),
+  ].join("-"));
+  const energyValue = energy || todayLog?.energy || "";
 
   return (
     <div className="min-h-screen bg-background pt-16 pb-24">
@@ -29,9 +95,9 @@ export default function SaudeFemininaPage() {
               <div className="p-4 flex items-start gap-3">
                 <Shield className="w-5 h-5 text-feminine shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-feminine text-sm">Seus dados estão protegidos</h4>
+                  <h4 className="font-bold text-feminine text-sm">Dados apenas neste navegador</h4>
                   <p className="text-xs text-feminine/80">
-                    Dados de ciclo menstrual são sensíveis, opcionais e criptografados. Você pode apagá-los a qualquer momento.
+                    Este protótipo salva entradas no armazenamento local do navegador, sem criptografia. Não informe dados reais de saúde.
                   </p>
                 </div>
               </div>
@@ -43,7 +109,7 @@ export default function SaudeFemininaPage() {
       <section className="px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
-            <Venus className="w-5 h-5 text-feminine" />
+            <Heart className="w-5 h-5 text-feminine" />
             <h1 className="text-2xl font-bold text-foreground">Saúde Feminina</h1>
           </div>
           <p className="text-muted-foreground">
@@ -63,13 +129,13 @@ export default function SaudeFemininaPage() {
                     <h4 className="font-bold text-foreground">Nível de energia</h4>
                     <p className="text-xs text-muted-foreground">Hoje</p>
                   </div>
-                  <Badge variant="feminine">Alto</Badge>
+                  <Badge variant="feminine">{energyValue || "Ainda não registrado"}</Badge>
                 </div>
                 <div className="mt-4 flex items-center gap-2">
                   <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-feminine" style={{ width: "75%" }} />
+                  <div className="h-full bg-feminine transition-all" style={{ width: energyValue === "Alta" ? "100%" : energyValue === "Média" ? "60%" : energyValue === "Baixa" ? "30%" : "0%" }} />
                   </div>
-                  <span className="text-sm font-bold text-foreground">75%</span>
+                <span className="text-sm font-bold text-foreground">{energyValue || "—"}</span>
                 </div>
               </CardContent>
             </Card>
@@ -80,11 +146,13 @@ export default function SaudeFemininaPage() {
                     <h4 className="font-bold text-foreground">Próxima menstruação</h4>
                     <p className="text-xs text-muted-foreground">Previsão</p>
                   </div>
-                  <Badge variant="primary" className="text-[10px]">12 dias</Badge>
+                  <Badge variant="default" className="text-[10px]">{daysUntilNextPeriod === null ? "Sem dados" : `${daysUntilNextPeriod} dias`}</Badge>
                 </div>
                 <div className="mt-4 text-center">
-                  <p className="text-2xl font-bold text-foreground">15/06/2026</p>
-                  <p className="text-xs text-muted-foreground">em 12 dias</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {nextPeriodDate ? new Intl.DateTimeFormat("pt-BR").format(nextPeriodDate) : "Informe o início"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Estimativa simples, não é orientação médica.</p>
                 </div>
               </CardContent>
             </Card>
@@ -98,14 +166,47 @@ export default function SaudeFemininaPage() {
                 {["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"].map((day, i) => (
                   <div key={day} className="flex-1 flex flex-col items-center gap-2">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                      i === 0 ? 'bg-feminine text-white' : 'bg-muted/50 text-muted-foreground'
+                      i === todayWeekday ? 'bg-feminine text-white' : 'bg-muted/50 text-muted-foreground'
                     }`}>
-                      {i === 0 ? '●' : day[0]}
+                      {i === todayWeekday ? '●' : day[0]}
                     </div>
                     <span className="text-[10px] text-muted-foreground">{day}</span>
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="px-4 py-4">
+        <div className="max-w-2xl mx-auto">
+          <Card className="p-4">
+            <CardContent className="space-y-3">
+              <h3 className="font-semibold">Configurar estimativa do ciclo</h3>
+              <label htmlFor="cycle-start" className="block text-sm">Primeiro dia da última menstruação</label>
+              <input
+                id="cycle-start"
+                type="date"
+                max={new Date().toISOString().slice(0, 10)}
+                value={cycleStartDate}
+                onChange={(event) => setCycleSettings(event.target.value, cycleLength)}
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              />
+              <label htmlFor="cycle-length" className="block text-sm">Duração média do ciclo (21 a 45 dias)</label>
+              <input
+                id="cycle-length"
+                type="number"
+                min={21}
+                max={45}
+                value={cycleLength}
+                onChange={(event) => {
+                  const value = Number(event.target.value);
+                  if (value >= 21 && value <= 45) setCycleSettings(cycleStartDate, value);
+                }}
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              />
+              <p className="text-xs text-muted-foreground">A estimativa considera um ciclo regular e pode não corresponder ao seu corpo. Não use como contraceptivo ou diagnóstico.</p>
             </CardContent>
           </Card>
         </div>
@@ -120,40 +221,37 @@ export default function SaudeFemininaPage() {
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <h3 className="font-bold text-foreground">Visão do seu ciclo</h3>
-                    <p className="text-sm text-muted-foreground">Fase atual: Folicular • Dia 14 de 28</p>
+                    <p className="text-sm text-muted-foreground">
+                      {cycleDay === null ? "Adicione os dados do ciclo para uma estimativa." : `Estimativa: fase ${currentPhase} • Dia ${cycleDay} de ${cycleLength}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Diagrama ilustrativo; a duração de cada fase varia.</p>
                   </div>
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-8">
                   <div className="w-48 h-48 mx-auto md:mx-0">
-                    <Doughnut
-                      data={PHASES}
-                      dataKey="percent"
-                      nameKey="name"
-                      cx={120}
-                      cy={120}
-                      innerRadius={80}
-                      outerRadius={100}
-                      stroke="#888"
-                      strokeWidth={2}
-                    >
-                      {PHASES.map((phase, index) => (
-                        <key key={index}>
-                          <defs>
-                            <linearGradient id={`color${index}`} x1="0" y1="0" x2="1" y2="0">
-                              <stop offset="0%" stopColor={phase.color} />
-                              <stop offset="100%" stopColor={phase.color} />
-                            </linearGradient>
-                          </defs>
-                        </key>
+                    <PieChart width={240} height={240}>
+                      <Pie
+                        data={PHASES}
+                        dataKey="percent"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={65}
+                        outerRadius={90}
+                        stroke="#fff"
+                      >
+                      {PHASES.map((phase) => (
+                        <Cell key={phase.name} fill={phase.color} />
                       ))}
-                    </Doughnut>
+                      </Pie>
+                    </PieChart>
                   </div>
                   <div className="flex-1 space-y-4">
                     {PHASES.map((phase) => (
                       <div key={phase.name} className="flex items-center gap-3">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: phase.color }} />
                         <span className="text-sm text-foreground">{phase.name}</span>
-                        <span className="ml-auto text-sm text-muted-foreground">{phase.percent}%</span>
+                        <span className="ml-auto text-sm text-muted-foreground">~{phase.percent}%</span>
                       </div>
                     ))}
                   </div>
@@ -169,7 +267,9 @@ export default function SaudeFemininaPage() {
         <div className="max-w-2xl mx-auto">
           <Card className="p-4">
             <CardContent>
-              <h4 className="font-bold text-foreground mb-4">Calendário mensal</h4>
+              <h4 className="font-bold text-foreground mb-4">
+                {new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(viewedMonth)}
+              </h4>
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"].map((day) => (
                   <div key={day} className="text-center text-[10px] font-medium text-muted-foreground">
@@ -178,14 +278,20 @@ export default function SaudeFemininaPage() {
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map((day) => {
-                  const isPeriod = day >= 1 && day <= 5;
-                  const isFertile = day >= 11 && day <= 16;
-                  const isOvulation = day === 14;
+                {calendarDays.map((day, index) => {
+                  if (day === null) return <div key={`empty-${index}`} />;
+                  const calendarDate = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth(), day);
+                  const calendarElapsed = parsedStart && calendarDate >= parsedStart
+                    ? Math.floor((calendarDate.getTime() - parsedStart.getTime()) / 86400000)
+                    : null;
+                  const calendarCycleDay = calendarElapsed === null ? null : (calendarElapsed % cycleLength) + 1;
+                  const isPeriod = calendarCycleDay !== null && calendarCycleDay <= 5;
+                  const isOvulation = calendarCycleDay === ovulationDay;
+                  const isFertile = calendarCycleDay !== null && calendarCycleDay >= ovulationDay - 5 && calendarCycleDay <= ovulationDay + 1;
                   return (
-                    <div key={day} className="aspect-square rounded-xl flex flex-col items-center justify-center cursor-pointer text-xs transition-all hover:scale-105">
+                    <div key={day} className="aspect-square rounded-xl flex flex-col items-center justify-center text-xs">
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                        isPeriod ? 'bg-feminine text-white' : isFertile ? 'bg-success/20 text-success' : isOvulation ? 'bg-warning/20 text-warning' : 'bg-background text-muted-foreground'
+                        isPeriod ? 'bg-feminine text-white' : isOvulation ? 'bg-warning/20 text-warning' : isFertile ? 'bg-success/20 text-success' : 'bg-background text-muted-foreground'
                       }`}>
                         {day}
                       </div>
@@ -229,19 +335,18 @@ export default function SaudeFemininaPage() {
                 <Card className="p-4">
                   <CardContent>
                     <h4 className="font-bold text-foreground mb-2">{phase.name}</h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Explicação simples sobre o que acontece nesta fase do ciclo menstrual.
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-4">{phase.body}</p>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 rounded-xl bg-muted/50">
                         <p className="text-xs font-semibold text-muted-foreground mb-1">No corpo</p>
-                        <p className="text-xs text-foreground">Mudanças hormonais típicas desta fase.</p>
+                        <p className="text-xs text-foreground">{phase.body}</p>
                       </div>
                       <div className="p-3 rounded-xl bg-muted/50">
-                        <p className="text-xs font-semibold text-muted-foreground mb-1">Alimentação</p>
-                        <p className="text-xs text-foreground">Alimentos recomendados para esta fase.</p>
+                        <p className="text-xs font-semibold text-muted-foreground mb-1">Autocuidado</p>
+                        <p className="text-xs text-foreground">{phase.care}</p>
                       </div>
                     </div>
+                    <p className="mt-3 text-xs text-muted-foreground">As fases e durações são aproximações educativas; ciclos e sintomas variam de pessoa para pessoa.</p>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -261,17 +366,27 @@ export default function SaudeFemininaPage() {
                   <p className="text-xs font-semibold text-muted-foreground mb-2">Humor</p>
                   <div className="flex gap-2">
                     {["😊", "😐", "😔", "😠"].map((emoji) => (
-                      <button key={emoji} className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl hover:scale-110 transition-transform">
+                      <button type="button" key={emoji} aria-pressed={mood === emoji} onClick={() => setMood(emoji)} className={`w-10 h-10 rounded-xl flex items-center justify-center text-2xl hover:scale-110 transition-transform ${mood === emoji ? "bg-feminine/20 ring-2 ring-feminine" : ""}`}>
                         {emoji}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground mb-2">Sintomas físicos</p>
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Energia</p>
                   <div className="flex gap-2">
+                    {["Baixa", "Média", "Alta"].map((level) => (
+                      <button type="button" key={level} aria-pressed={energyValue === level} onClick={() => setEnergy(level)} className={`px-3 py-1.5 rounded-full border border-border text-xs hover:bg-muted transition-colors ${energyValue === level ? "bg-feminine/20 border-feminine" : ""}`}>
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Sintomas físicos</p>
+                  <div className="flex flex-wrap gap-2">
                     {["Cólica", "Dor de cabeça", "Inchaço", "Fadiga"].map((symptom) => (
-                      <button key={symptom} className="px-3 py-1.5 rounded-full border border-border text-xs text-sm hover:bg-muted transition-colors">
+                      <button type="button" key={symptom} aria-pressed={symptoms.includes(symptom)} onClick={() => setSymptoms((current) => current.includes(symptom) ? current.filter((entry) => entry !== symptom) : [...current, symptom])} className={`px-3 py-1.5 rounded-full border border-border text-xs hover:bg-muted transition-colors ${symptoms.includes(symptom) ? "bg-feminine/20 border-feminine" : ""}`}>
                         {symptom}
                       </button>
                     ))}
@@ -279,17 +394,28 @@ export default function SaudeFemininaPage() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground mb-2">Intensidade do fluxo</p>
-                  <div className="flex gap-2">
-                    {["Leve", "Moderado", "Intenso"].map((flow) => (
-                      <button key={flow} className="px-3 py-1.5 rounded-full border border-border text-xs text-sm hover:bg-muted transition-colors">
-                        {flow}
+                  <div className="flex flex-wrap gap-2">
+                    {["Leve", "Moderado", "Intenso"].map((flowOption) => (
+                      <button type="button" key={flowOption} aria-pressed={flow === flowOption} onClick={() => setFlow(flowOption)} className={`px-3 py-1.5 rounded-full border border-border text-xs hover:bg-muted transition-colors ${flow === flowOption ? "bg-feminine/20 border-feminine" : ""}`}>
+                        {flowOption}
                       </button>
                     ))}
                   </div>
                 </div>
-                <Button variant="feminine" className="w-full mt-4">
+                <Button
+                  variant="feminine"
+                  className="w-full mt-4"
+                  disabled={!mood && symptoms.length === 0 && !flow && !energy}
+                  onClick={() => {
+                    if (!mood && symptoms.length === 0 && !flow && !energy) return;
+                    saveCycleLog({ mood, symptoms, flow, energy });
+                    setSavedMessage("Registro salvo somente neste navegador.");
+                  }}
+                >
                   Salvar meu cofre de saúde
                 </Button>
+                {savedMessage && <p role="status" className="mt-2 text-center text-xs text-muted-foreground">{savedMessage}</p>}
+                {cycleLogs.length > 0 && <p className="text-center text-xs text-muted-foreground">{cycleLogs.length} registro(s) local(is) salvo(s).</p>}
               </div>
             </CardContent>
           </Card>
@@ -350,10 +476,6 @@ export default function SaudeFemininaPage() {
   );
 }
 
-function Venus({ className }: { className?: string }) {
-  return <venus className={className} />;
-}
-
 function HealthDisclaimerFooterFeminina() {
   return (
     <footer className="border-t border-border bg-background py-6 px-4 mt-auto">
@@ -362,7 +484,7 @@ function HealthDisclaimerFooterFeminina() {
           <div className="w-5 h-5 text-warning shrink-0 mt-0.5">⚠</div>
           <div className="text-sm text-muted-foreground">
             <p className="font-semibold text-foreground mb-1">Aviso importante</p>
-            <p>O conteúdo deste app é educativo e não substitui consulta médica. Em caso de emergência, ligue para <a href="tel:192" className="font-semibold text-success hover:underline">SAMU 192</a> ou procure a <a href="#" className="font-semibold text-success hover:underline">UPA</a> mais próxima.</p>
+            <p>O conteúdo deste app é educativo e não substitui consulta médica. Em caso de emergência, ligue para <a href="tel:192" className="font-semibold text-success hover:underline">SAMU 192</a> ou procure a UPA mais próxima.</p>
           </div>
         </div>
         <div className="text-center text-xs text-muted-foreground mt-4">

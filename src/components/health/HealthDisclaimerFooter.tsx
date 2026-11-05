@@ -16,11 +16,7 @@ export function HealthDisclaimerFooter() {
               <a href="tel:192" className="font-semibold text-success hover:underline">
                 SAMU 192
               </a>{" "}
-              ou procure a{" "}
-              <a href="#" className="font-semibold text-success hover:underline">
-                UPA
-              </a>{" "}
-              mais próxima.
+              ou procure a UPA mais próxima.
             </p>
           </div>
         </div>

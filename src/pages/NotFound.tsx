@@ -17,8 +17,8 @@ export default function NotFound() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="success" className="w-full" leftIcon={<ArrowLeft className="w-4 h-4" />}>
-            Voltar ao início
+          <Button asChild variant="success" className="w-full" leftIcon={<ArrowLeft className="w-4 h-4" />}>
+            <Link to="/">Voltar ao início</Link>
           </Button>
         </CardContent>
       </Card>

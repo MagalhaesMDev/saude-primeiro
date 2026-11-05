@@ -11,6 +11,15 @@ O **Saúde Primeiro** é uma plataforma mobile-first que combina:
 - **Saúde feminina** com acompanhamento de ciclo menstrual
 - **Gamificação** com pontos, níveis e cashback
 
+> **Estado atual:** protótipo front-end para demonstração. Login, plano selecionado,
+> lembretes, pontos e diário do ciclo (humor, sintomas, fluxo e energia) são salvos
+> no armazenamento local do navegador. Arquivos selecionados no cofre ficam apenas
+> em memória durante a sessão e não são enviados nem persistidos.
+> Não existe API integrada, contratação de seguro, teleconsulta, envio de sinistro,
+> recuperação de senha ou armazenamento seguro de documentos. Não use dados reais,
+> especialmente dados de saúde. O armazenamento local não é criptografado e não
+> atende, por si só, a requisitos de LGPD ou produção.
+
 ## 🚀 Tecnologias
 
 - **Front-end**: React + TypeScript + Vite + Tailwind CSS
@@ -26,33 +35,21 @@ O **Saúde Primeiro** é uma plataforma mobile-first que combina:
 
 ```bash
 # Instalar dependências
-npm install
+pnpm install
 
-# Configurar variáveis de ambiente
-cp .env.example .env
-# Editar .env com suas configurações
-
-# Gerar cliente Prisma
-npx prisma generate
-
-# Criar banco de dados (se necessário)
-npx prisma db push
-
-# Rodar seed (opcional)
-npx prisma db seed
-
-# Iniciar desenvolvimento
-npm run dev
+# Iniciar protótipo
+pnpm dev
 ```
+
+Os comandos `db:*` exigem PostgreSQL e `DATABASE_URL` configurados. O banco e o
+cliente Prisma ainda não são usados pelas telas do protótipo.
 
 ## 🌍 Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
+Para usar os comandos Prisma, configure `DATABASE_URL` em um arquivo `.env` na raiz:
 
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/saudeprimeiro"
-NEXTAUTH_SECRET="seu-secreto-aqui"
-NEXTAUTH_URL="http://localhost:3000"
 ```
 
 ## 📂 Estrutura do Projeto
@@ -86,7 +83,8 @@ saude-primeiro/
 │   │   ├── Login.tsx
 │   │   └── NotFound.tsx
 │   ├── store/
-│   │   └── authStore.ts
+│   │   ├── authStore.ts
+│   │   └── prototypeStore.ts
 │   ├── lib/
 │   │   └── utils.ts
 │   └── globals.css
@@ -131,7 +129,7 @@ Configure as variáveis de ambiente no painel do Vercel.
 3. **Zustand para estado**: Estado global leve e performático
 4. **Prisma ORM**: Abstração de banco com migrations e seed
 5. **Tailwind CSS**: Estilização utilitária com design tokens
-6. **NextAuth (futuro)**: Autenticação segura com e-mail/senha e provedores sociais
+6. **Autenticação**: ainda não implementada; o login atual é apenas demonstrativo
 7. **Zod para validação**: Validação de schemas front e back
 8. **LGPD compliance**: Dados sensíveis criptografados e consentimento explícito
 

@@ -72,7 +72,7 @@ async function main() {
   });
 
   // Criar trilhas
-  const trails = await prisma.trail.createMany({
+  await prisma.trail.createMany({
     data: [
       {
         title: 'Prevenção de acidentes de trabalho',
