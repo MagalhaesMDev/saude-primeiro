@@ -42,11 +42,11 @@ const GLOSSARY = [
 export default function AprenderPage() {
   const [activeFilter, setActiveFilter] = useState("Todos");
   const [expandedTrail, setExpandedTrail] = useState<string | null>(null);
-  const { points, dailyPoints, dailyPointsDate, completeTrailLesson, trailProgress, quizAnswered, quizCorrect, quizSelectedAnswer, answerQuiz } = usePrototypeStore();
+  const [featuredImageFailed, setFeaturedImageFailed] = useState(false);
+  const { points, dailyPoints, dailyPointsDate, completeTrailLesson, trailProgress, quizAnswered, quizCorrect, quizSelectedAnswer, answerQuiz, resetQuiz } = usePrototypeStore();
   const date = new Date();
   const todayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   const todayPoints = dailyPointsDate === todayKey ? dailyPoints : 0;
-  const quizPointsAwarded = Math.min(10, Math.max(100 - todayPoints, 0));
   const level = points >= 1000 ? "Ouro" : points >= 400 ? "Prata" : "Bronze";
   const pointsToNext = level === "Bronze" ? 400 - points : level === "Prata" ? 1000 - points : 0;
   const levelProgress = level === "Bronze" ? Math.min(points / 400 * 100, 100) : level === "Prata" ? Math.min((points - 400) / 600 * 100, 100) : 100;
@@ -73,8 +73,8 @@ export default function AprenderPage() {
 
       <section className="px-4 py-3"><Card className="mx-auto max-w-3xl border-success/15 bg-success/5"><CardContent className="flex items-start gap-3 p-4"><Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-success" /><div className="flex-1"><h2 className="text-sm font-bold">Aprendizado Consciente</h2><p className="mt-1 text-xs leading-5 text-muted-foreground">Limite saudável de 100 pts/dia. Você já conquistou {todayPoints}/100 pts hoje.</p><Progress value={Math.min(todayPoints, 100)} className="mt-3 h-2 [&>div]:bg-success" aria-label={`${todayPoints} de 100 pontos demonstrativos ganhos hoje`} /></div></CardContent></Card></section>
 
-      <section className="px-4 py-4"><div className="mx-auto max-w-3xl"><div className="mb-2 flex items-center justify-between gap-2"><h2 className="font-bold">Escolha seus temas</h2><span className="shrink-0 text-[10px] text-muted-foreground">Filtro ativo</span></div><div className="flex gap-2 overflow-x-auto pb-2" role="group" aria-label="Filtrar temas">
-        {FILTERS.map((filter) => <button key={filter} type="button" aria-pressed={activeFilter === filter} onClick={() => setActiveFilter(filter)} className={`min-h-9 shrink-0 rounded-full border px-4 text-xs font-medium ${activeFilter === filter ? "border-primary bg-primary text-white" : "bg-card text-muted-foreground hover:bg-muted"}`}>{filter}</button>)}
+      <section className="px-4 py-4"><div className="mx-auto max-w-3xl"><div className="mb-2 flex items-center justify-between gap-2"><h2 className="font-bold">Escolha seus temas</h2><span className="shrink-0 text-[10px] text-muted-foreground">Filtro ativo</span></div><div className="scrollbar-hidden flex gap-2 overflow-x-auto pb-2" role="group" aria-label="Filtrar temas">
+        {FILTERS.map((filter) => <button key={filter} type="button" aria-pressed={activeFilter === filter} onClick={() => setActiveFilter(filter)} className={`min-h-9 shrink-0 rounded-full border px-4 text-xs font-medium ${activeFilter === filter ? "border-primary bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}>{filter}</button>)}
       </div></div></section>
 
       <section className="px-4 py-4"><Card className="mx-auto max-w-3xl overflow-hidden">
@@ -82,10 +82,22 @@ export default function AprenderPage() {
           <div className="flex flex-wrap items-center justify-between gap-2"><Badge variant="secondary" className="font-bold uppercase tracking-wide">LIÇÃO EM DESTAQUE</Badge><Badge variant="mint">+10 pts e R$ 0,20 em cashback demonstrativo</Badge></div>
           <h2 className="mt-3 text-lg font-bold">Como se proteger contra quedas e lesões no trabalho</h2>
           <div className="relative mt-4 overflow-hidden rounded-2xl bg-primary/10">
-            <img src="/entregador-placeholder.svg" alt="Ilustração demonstrativa de uma pessoa entregadora usando capacete e colete refletivo junto à motocicleta" className="h-44 w-full object-cover" />
+            {featuredImageFailed ? (
+              <div role="img" aria-label="Ilustração local de pessoa entregadora" className="flex h-44 w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-primary/10 to-success/10 text-primary">
+                <Truck className="h-12 w-12" aria-hidden="true" />
+                <span className="text-xs font-medium">Ilustração da lição indisponível</span>
+              </div>
+            ) : (
+              <img
+                src="/entregador-moto.png"
+                alt="Entregador com capacete e colete refletivo ao lado de uma motocicleta vermelha"
+                className="h-44 w-full object-cover"
+                onError={() => setFeaturedImageFailed(true)}
+              />
+            )}
             <Badge className="absolute bottom-2 left-2 gap-1 bg-foreground/75 text-white"><Timer className="h-3.5 w-3.5" />2 min de leitura</Badge>
           </div>
-          <ol className="my-3 space-y-2">{LESSON_STEPS.map((step, index) => <li key={step.title} className="flex items-start gap-2.5 rounded-xl bg-primary/5 p-2.5 text-[13px] leading-snug"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">{index + 1}</span><p><strong>{step.title}</strong> {step.text}</p></li>)}</ol>
+          <ol className="my-3 space-y-2">{LESSON_STEPS.map((step, index) => <li key={step.title} className="flex items-start gap-2.5 rounded-xl bg-primary/5 p-2.5 text-[13px] leading-snug"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">{index + 1}</span><p><strong>{step.title}</strong> {step.text}</p></li>)}</ol>
           <div className="mt-4 rounded-xl bg-primary/10 p-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h3 className="flex items-center gap-1.5 text-sm font-bold text-primary"><Brain className="h-4 w-4" />Quiz Rápido</h3>
@@ -123,11 +135,10 @@ export default function AprenderPage() {
               <div role="status" aria-live="polite" className={`mt-3 rounded-xl p-3 text-xs leading-5 ${quizCorrect ? "bg-success/10 text-success" : "bg-card text-foreground"}`}>
                 <p className="font-bold">{quizCorrect ? "Muito bem! Essa é a forma mais segura." : "Resposta incorreta. Veja a alternativa mais segura."}</p>
                 <p className="mt-1">{quizCorrect
-                  ? quizPointsAwarded > 0
-                    ? `Você acertou e ganhou ${quizPointsAwarded} ponto${quizPointsAwarded === 1 ? "" : "s"} demonstrativo${quizPointsAwarded === 1 ? "" : "s"}.`
-                    : "O limite demonstrativo de 100 pontos do dia já foi atingido; não foram adicionados pontos."
+                  ? "Resposta registrada. A pontuação demonstrativa respeita o limite de 100 pontos por dia."
                   : "Dobre os joelhos, mantenha as costas eretas e aproxime a carga do corpo."}</p>
                 <p className="mt-1 text-[10px] text-muted-foreground">Pontuação ilustrativa, sujeita ao limite de 100 pts/dia; cashback sem conversão ou resgate em dinheiro.</p>
+                {!quizCorrect && <Button variant="outline" size="sm" className="mt-3" onClick={resetQuiz}>Tentar novamente</Button>}
               </div>
             )}
           </div>

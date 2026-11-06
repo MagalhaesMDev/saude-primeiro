@@ -26,6 +26,7 @@ describe("AprenderPage", () => {
       quizAnswered: false,
       quizCorrect: null,
       quizSelectedAnswer: null,
+      quizRewardClaimed: false,
     });
   });
 
@@ -37,7 +38,7 @@ describe("AprenderPage", () => {
     expect(usePrototypeStore.getState().quizCorrect).toBe(true);
     expect(usePrototypeStore.getState().quizSelectedAnswer).toBe(1);
     expect(usePrototypeStore.getState().points).toBe(290);
-    expect(screen.getByRole("status")).toHaveTextContent(/ganhou 10 pontos demonstrativos/i);
+    expect(screen.getByRole("status")).toHaveTextContent(/pontuação demonstrativa respeita o limite/i);
     expect(screen.getByRole("button", { name: /dobrar os joelhos/i })).toBeDisabled();
   });
 
@@ -50,5 +51,11 @@ describe("AprenderPage", () => {
     expect(usePrototypeStore.getState().points).toBe(280);
     expect(screen.getByRole("status")).toHaveTextContent(/resposta incorreta/i);
     expect(screen.getByText(/dobre os joelhos, mantenha as costas eretas/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /tentar novamente/i }));
+    fireEvent.click(screen.getByRole("button", { name: /dobrar os joelhos/i }));
+
+    expect(usePrototypeStore.getState().quizCorrect).toBe(true);
+    expect(usePrototypeStore.getState().points).toBe(290);
   });
 });

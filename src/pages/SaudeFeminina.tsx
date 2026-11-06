@@ -84,31 +84,31 @@ export default function SaudeFemininaPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fff8f9] pb-28 pt-14">
+    <main className="min-h-screen bg-feminine-background pb-28 pt-14">
       <h1 className="sr-only">Saúde Feminina</h1>
       <section className="space-y-2 px-4 pb-2 pt-3">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-2">
           <Link
             to="/cuidar"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#f5e6ec] bg-white px-3 text-xs font-semibold text-muted-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-feminine focus-visible:ring-offset-2"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-feminine/15 bg-card px-3 text-xs font-semibold text-muted-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-feminine focus-visible:ring-offset-2"
           >
             <ArrowLeft className="h-4 w-4 text-feminine" aria-hidden="true" />
             Voltar para Cuidar
           </Link>
           <Badge variant="feminine" className="rounded-full">Modo Acolhimento</Badge>
         </div>
-        <Card className="mx-auto max-w-3xl rounded-2xl border-[#fde2ec] bg-white/90 shadow-sm"><CardContent className="flex items-start gap-2.5 p-3">
+        <Card className="mx-auto max-w-3xl rounded-2xl border-feminine/15 bg-card shadow-sm"><CardContent className="flex items-start gap-2.5 p-3">
           <Shield className="mt-0.5 h-5 w-5 shrink-0 text-feminine" />
           <p className="text-xs leading-5 text-muted-foreground"><strong className="text-foreground">Privacidade & LGPD:</strong> Seus registros ficam somente neste navegador, sem criptografia. Este protótipo não garante conformidade com a LGPD; evite inserir dados reais de saúde.</p>
         </CardContent></Card>
       </section>
 
       <section className="px-4 py-2">
-        <Card className="mx-auto max-w-3xl rounded-[28px] border-[#fee7ee] bg-white shadow-[0_4px_24px_rgba(255,145,175,0.12)]">
+        <Card className="mx-auto max-w-3xl rounded-[28px] border-feminine/15 bg-card shadow-[0_4px_24px_rgba(255,145,175,0.12)]">
           <CardContent className="p-4 sm:p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-2">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#fff0f4] text-feminine"><Activity className="h-5 w-5" /></span>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-feminine/10 text-feminine"><Activity className="h-5 w-5" /></span>
                 <div className="min-w-0"><h2 className="text-sm font-bold">Nível de Energia</h2><p className="text-xs text-muted-foreground">{energyValue ? `Disposição: ${energyValue}` : "Registre como você está se sentindo"}</p></div>
               </div>
               <div className="shrink-0 text-right"><p className="text-sm font-bold">{new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "long" }).format(localToday)}</p><button type="button" onClick={() => scrollTo("cycle-calendar")} aria-label="Ir para calendário do ciclo" className="text-xs font-medium text-feminine">Ver calendário</button></div>
@@ -120,17 +120,17 @@ export default function SaudeFemininaPage() {
                 const isPredicted = cycleOffset !== null && cycleOffset <= 5 && !isToday;
                 return <div key={date.toISOString()} className="flex flex-col items-center gap-1">
                   <span className={`text-[10px] font-semibold ${isToday ? "text-foreground" : "text-muted-foreground"}`}>{isToday ? "HOJE" : ["D", "S", "T", "Q", "Q", "S", "S"][date.getDay()]}</span>
-                  <span className={`flex h-9 w-9 items-center justify-center rounded-full text-sm ${isToday ? "bg-[#e5e5eb] font-bold text-foreground" : isPredicted ? "bg-[#ffe7ef] font-semibold text-feminine" : "text-foreground"}`}>{date.getDate()}</span>
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-full text-sm ${isToday ? "bg-muted font-bold text-foreground" : isPredicted ? "bg-feminine/10 font-semibold text-feminine" : "text-foreground"}`}>{date.getDate()}</span>
                 </div>;
               })}
             </div>
-            <div className="my-2 flex min-h-40 flex-col items-center justify-center rounded-[24px] bg-gradient-to-b from-[#fff5ee] via-[#fff1f6] to-white">
-              <span className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-white text-feminine shadow-md shadow-feminine/10"><BatteryCharging className="h-12 w-12" aria-hidden="true" /></span>
+            <div className="my-2 flex min-h-24 flex-col items-center justify-center rounded-[24px] bg-gradient-to-b from-feminine/10 via-feminine/5 to-card">
+              <span className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-card text-feminine shadow-md shadow-feminine/10"><BatteryCharging className="h-10 w-10" aria-hidden="true" /></span>
               <span className="mt-2 text-xs font-semibold text-muted-foreground">{energyValue ? `Energia registrada: ${energyValue}` : "Seu bem-estar, no seu ritmo"}</span>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#fcd4e2] bg-gradient-to-r from-[#fff5f8] to-[#fff0f4] p-3">
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-feminine/20 bg-gradient-to-r from-feminine/10 to-feminine/5 p-3">
               <div className="flex min-w-0 items-center gap-2.5">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-feminine text-white"><HeartPulse className="h-5 w-5" /></span>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-feminine text-feminine-foreground"><HeartPulse className="h-5 w-5" /></span>
                 <div className="min-w-0"><p className="text-xs font-bold">Previsão do ciclo</p><p className="text-[11px] leading-4 text-muted-foreground">{cycleDay === null ? "Informe o início do ciclo para ver uma estimativa." : `Fase ${currentPhase ?? "estimada"} · Dia ${cycleDay} de ${cycleLength}`}</p></div>
               </div>
               <Badge variant="feminine" className="shrink-0">{cycleDay === null ? "Sem dados" : `${fertileShare}% do ciclo`}</Badge>
@@ -141,16 +141,16 @@ export default function SaudeFemininaPage() {
         </Card>
       </section>
 
-      <section className="px-4 py-3"><div className="mx-auto grid max-w-3xl grid-cols-4 gap-2 border-t border-[#f8e7ec] pt-4">
+      <section className="px-4 py-1"><div className="mx-auto grid max-w-3xl grid-cols-4 gap-1 border-t border-feminine/15 pt-2 pr-14 sm:gap-2 sm:pt-4 sm:pr-0">
         {[
           { label: "Registrar menstruação", icon: CalendarDays, action: registerPeriod },
           { label: "Sintomas", icon: HeartPulse, action: () => scrollTo("cycle-diary") },
           { label: "Sexo", icon: Heart, action: () => { scrollTo("cycle-diary"); window.setTimeout(() => document.getElementById("intimacy")?.focus(), 350); } },
           { label: "Registro", icon: NotebookPen, action: () => scrollTo("cycle-diary") },
-        ].map(({ label, icon: Icon, action }) => <button key={label} type="button" onClick={action} className="flex min-h-11 min-w-0 flex-col items-center gap-2 rounded-xl p-1 text-center text-[10px] font-semibold text-foreground hover:bg-feminine/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-feminine"><span className="flex h-14 w-14 items-center justify-center rounded-full bg-feminine text-white shadow-md shadow-feminine/20"><Icon className="h-6 w-6" /></span>{label}</button>)}
+        ].map(({ label, icon: Icon, action }) => <button key={label} type="button" onClick={action} className="flex min-h-11 min-w-0 flex-col items-center gap-1 rounded-xl p-1 text-center text-[10px] font-semibold text-foreground hover:bg-feminine/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-feminine"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-feminine text-feminine-foreground shadow-md shadow-feminine/20"><Icon className="h-5 w-5" /></span>{label}</button>)}
       </div>{savedMessage && <p role="status" className="mx-auto mt-2 max-w-3xl text-center text-xs text-feminine">{savedMessage}</p>}</section>
 
-      <section id="cycle-calendar" className="px-4 py-3"><Card className="mx-auto max-w-3xl rounded-[26px] border-[#fee7ee] bg-white"><CardContent className="p-4">
+      <section id="cycle-calendar" className="px-4 py-3"><Card className="mx-auto max-w-3xl rounded-[26px] border-feminine/15 bg-card"><CardContent className="p-4">
         <div className="mb-4 flex items-center justify-between"><div><h2 className="font-bold">Calendário do ciclo</h2><p className="text-xs text-muted-foreground">Estimativa para {new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(viewedMonth)}</p></div><CalendarDays className="h-5 w-5 text-feminine" /></div>
         <div className="mb-2 grid grid-cols-7 gap-1">{["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"].map((day) => <span key={day} className="text-center text-[9px] font-semibold text-muted-foreground">{day}</span>)}</div>
         <div className="grid grid-cols-7 gap-1">{calendarDays.map((day, index) => {
@@ -164,7 +164,7 @@ export default function SaudeFemininaPage() {
           const isFollicular = dayOfCycle !== null && dayOfCycle > 5 && dayOfCycle < ovulationDay - 5;
           const isLuteal = dayOfCycle !== null && dayOfCycle > ovulationDay + 1;
           const isToday = localDateKey(date) === todayKey;
-          return <span key={day} aria-label={`${day} ${isPeriod ? "menstruação estimada" : isOvulation ? "ovulação estimada" : isFertile ? "janela fértil estimada" : ""}`} className={`flex aspect-square flex-col items-center justify-center rounded-xl text-xs ${isToday ? "scale-105 bg-feminine font-bold text-white shadow-md" : isPeriod ? "bg-feminine/90 font-semibold text-white" : isOvulation ? "bg-success font-bold text-white" : isFertile ? "bg-success/15 font-semibold text-success" : isFollicular ? "bg-violet-100 font-medium text-violet-800" : isLuteal ? "bg-orange-50 font-medium text-orange-800" : "text-muted-foreground"}`}>{day}{isPeriod && <span className="text-[8px] leading-none">●</span>}{isFertile && !isOvulation && <span className="text-[8px] leading-none">✦</span>}</span>;
+          return <span key={day} aria-label={`${day} ${isPeriod ? "menstruação estimada" : isOvulation ? "ovulação estimada" : isFertile ? "janela fértil estimada" : ""}`} className={`flex aspect-square flex-col items-center justify-center rounded-xl text-xs ${isToday ? "scale-105 bg-feminine font-bold text-feminine-foreground shadow-md" : isPeriod ? "bg-feminine/90 font-semibold text-feminine-foreground" : isOvulation ? "bg-success font-bold text-success-foreground" : isFertile ? "bg-success/15 font-semibold text-success" : isFollicular ? "bg-violet-500/15 font-medium text-violet-300" : isLuteal ? "bg-orange-500/15 font-medium text-orange-300" : "text-muted-foreground"}`}>{day}{isPeriod && <span className="text-[8px] leading-none">●</span>}{isFertile && !isOvulation && <span className="text-[8px] leading-none">✦</span>}</span>;
         })}</div>
         <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-muted-foreground"><span className="flex items-center gap-1"><i className="h-2 w-2 rounded-full bg-feminine" />Menstruação estimada</span><span className="flex items-center gap-1"><i className="h-2 w-2 rounded-full bg-success/20" />Janela fértil estimada</span><span className="flex items-center gap-1"><i className="h-2 w-2 rounded-full bg-success" />Ovulação estimada</span></div>
       </CardContent></Card></section>
@@ -178,8 +178,8 @@ export default function SaudeFemininaPage() {
       <section className="px-4 py-4"><div className="mx-auto max-w-3xl">
         <h2 className="mb-3 text-lg font-bold">As 4 Fases do Seu Ciclo</h2>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto bg-feminine/10 p-1">{PHASES.map((phase, index) => <TabsTrigger key={phase.name} value={phase.name} className="min-h-10 min-w-fit shrink-0 px-3 py-2 text-[11px] data-[state=active]:bg-feminine data-[state=active]:text-white">{index + 1}. {phase.name}{phase.name === currentPhase ? " (Atual)" : ""}</TabsTrigger>)}</TabsList>
-          <TabsContent value={activeTab} className="mt-3"><Card className="border-feminine/15 bg-feminine/5"><CardContent className="p-4"><h3 className="font-bold text-feminine">{selectedPhase.name}</h3><div className="mt-3 grid gap-3 sm:grid-cols-2"><div className="rounded-xl bg-white p-3"><p className="mb-1 text-xs font-bold text-feminine">No corpo</p><p className="text-xs leading-5">{selectedPhase.body}</p></div><div className="rounded-xl bg-white p-3"><p className="mb-1 text-xs font-bold text-feminine">Autocuidado</p><p className="text-xs leading-5">{selectedPhase.care}</p></div></div><p className="mt-3 text-[10px] text-muted-foreground">A estimativa não substitui orientação de profissional de saúde.</p></CardContent></Card></TabsContent>
+          <TabsList className="scrollbar-hidden flex h-auto w-full justify-start gap-1 overflow-x-auto bg-feminine/10 p-1">{PHASES.map((phase, index) => <TabsTrigger key={phase.name} value={phase.name} className="min-h-10 min-w-fit shrink-0 px-3 py-2 text-[11px] data-[state=active]:bg-feminine data-[state=active]:text-feminine-foreground">{index + 1}. {phase.name}{phase.name === currentPhase ? " (Atual)" : ""}</TabsTrigger>)}</TabsList>
+          <TabsContent value={activeTab} className="mt-3"><Card className="border-feminine/15 bg-feminine/5"><CardContent className="p-4"><h3 className="font-bold text-feminine">{selectedPhase.name}</h3><div className="mt-3 grid gap-3 sm:grid-cols-2"><div className="rounded-xl bg-card p-3"><p className="mb-1 text-xs font-bold text-feminine">No corpo</p><p className="text-xs leading-5">{selectedPhase.body}</p></div><div className="rounded-xl bg-card p-3"><p className="mb-1 text-xs font-bold text-feminine">Autocuidado</p><p className="text-xs leading-5">{selectedPhase.care}</p></div></div><p className="mt-3 text-[10px] text-muted-foreground">A estimativa não substitui orientação de profissional de saúde.</p></CardContent></Card></TabsContent>
         </Tabs>
       </div></section>
 

@@ -80,6 +80,7 @@ interface PrototypeState {
   quizAnswered: boolean;
   quizCorrect: boolean | null;
   quizSelectedAnswer: number | null;
+  quizRewardClaimed: boolean;
   trailProgress: Record<string, number>;
   dailyPoints: number;
   dailyPointsDate: string;
@@ -95,6 +96,7 @@ interface PrototypeState {
   completeLesson: (title: string) => void;
   completeTrailLesson: (trailId: string, lessonTitle: string) => void;
   answerQuiz: (selectedAnswer: number) => void;
+  resetQuiz: () => void;
   redeemCashback: () => void;
 }
 
@@ -109,6 +111,7 @@ type PersistedPrototypeState = Omit<
   | "completeLesson"
   | "completeTrailLesson"
   | "answerQuiz"
+  | "resetQuiz"
   | "redeemCashback"
 >;
 
@@ -125,6 +128,7 @@ const INITIAL_PERSISTED_STATE: PersistedPrototypeState = {
   quizAnswered: false,
   quizCorrect: null,
   quizSelectedAnswer: null,
+  quizRewardClaimed: false,
   trailProgress: { work: 3, women: 0, men: 0, family: 0, wellness: 0 },
   dailyPoints: 25,
   dailyPointsDate: getLocalDateString(new Date()),
@@ -227,6 +231,7 @@ function migratePrototypeState(value: unknown): PersistedPrototypeState {
     quizAnswered: false,
     quizCorrect: null,
     quizSelectedAnswer: null,
+    quizRewardClaimed: value.quizRewardClaimed === true || (value.quizAnswered === true && value.quizCorrect === true),
     trailProgress,
     dailyPoints: typeof value.dailyPoints === "number" && Number.isFinite(value.dailyPoints)
       ? Math.min(Math.max(value.dailyPoints, 0), 100)
@@ -320,9 +325,14 @@ export const usePrototypeStore = create<PrototypeState>()(
                 quizAnswered: true,
                 quizCorrect: selectedAnswer === 1,
                 quizSelectedAnswer: selectedAnswer,
-                ...addDailyPoints(state, selectedAnswer === 1 ? 10 : 0),
+                quizRewardClaimed: state.quizRewardClaimed || selectedAnswer === 1,
+                ...addDailyPoints(state, selectedAnswer === 1 && !state.quizRewardClaimed ? 10 : 0),
               }
         ),
+      resetQuiz: () =>
+        set((state) => state.quizCorrect === true
+          ? state
+          : { quizAnswered: false, quizCorrect: null, quizSelectedAnswer: null }),
       redeemCashback: () =>
         set((state) => ({
           cashbackRedeemedCount: Math.min(
@@ -333,7 +343,7 @@ export const usePrototypeStore = create<PrototypeState>()(
     }),
     {
       name: "saude-primeiro-prototype",
-      version: 3,
+      version: 4,
       migrate: migratePrototypeState,
       partialize: (state) => ({
         selectedPlan: state.selectedPlan,
@@ -348,6 +358,7 @@ export const usePrototypeStore = create<PrototypeState>()(
         quizAnswered: state.quizAnswered,
         quizCorrect: state.quizCorrect,
         quizSelectedAnswer: state.quizSelectedAnswer,
+        quizRewardClaimed: state.quizRewardClaimed,
         trailProgress: state.trailProgress,
         dailyPoints: state.dailyPoints,
         dailyPointsDate: state.dailyPointsDate,

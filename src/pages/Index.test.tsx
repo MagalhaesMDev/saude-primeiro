@@ -40,7 +40,7 @@ describe("IndexPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Acima de R$ 30" }));
     expect(screen.getByRole("heading", { name: "Renda" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Contratar este plano" }));
+    fireEvent.click(screen.getByRole("button", { name: "Selecionar para comparar" }));
     expect(usePrototypeStore.getState().selectedPlan).toEqual({ name: "Renda", price: 39.9 });
     expect(screen.getByText(/não gera contrato, cobrança ou cobertura/i)).toBeInTheDocument();
   });

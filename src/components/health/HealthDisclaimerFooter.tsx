@@ -22,7 +22,7 @@ export function HealthDisclaimerFooter() {
         </div>
         <div className="text-center text-xs text-muted-foreground mt-4">
           <p>
-            Os valores e parceiros apresentados são ilustrativos. Consulte os termos do seu plano.
+            Valores, coberturas e parceiros são ilustrativos; este protótipo não oferece planos reais.
           </p>
         </div>
       </div>

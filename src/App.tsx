@@ -9,7 +9,9 @@ import NotFound from "./pages/NotFound";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { FloatingSupportButton } from "@/components/layout/FloatingSupportButton";
+import { ThemeProvider } from "next-themes";
 import { useAuthStore } from "@/store/authStore";
+import LegalInfoPage from "./pages/LegalInfo";
 
 function AppRoutes() {
   const location = useLocation();
@@ -23,6 +25,8 @@ function AppRoutes() {
         <Route path="/cuidar" element={<CuidarPage />} />
         <Route path="/aprender" element={<AprenderPage />} />
         <Route path="/saude-feminina" element={<SaudeFemininaPage />} />
+        <Route path="/privacidade" element={<LegalInfoPage />} />
+        <Route path="/termos" element={<LegalInfoPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cadastro" element={<LoginPage />} />
         <Route path="/esqueci-senha" element={<LoginPage />} />
@@ -50,8 +54,10 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="saude-primeiro-theme">
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

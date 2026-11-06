@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config: Config = {
   darkMode: ['class'],
@@ -63,7 +64,8 @@ const config: Config = {
         feminine: {
           DEFAULT: 'hsl(var(--feminine))',
           foreground: 'hsl(var(--feminine-foreground))',
-          surface: 'hsl(347 78% 96%)',
+          surface: 'hsl(var(--feminine-background))',
+          background: 'hsl(var(--feminine-background))',
         },
         mint: {
           DEFAULT: 'hsl(var(--mint))',
@@ -91,7 +93,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;
 
 export default config;

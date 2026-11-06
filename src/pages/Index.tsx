@@ -111,7 +111,7 @@ export default function IndexPage() {
             <div className="mt-6 rounded-2xl border border-success/25 bg-gradient-to-r from-success/5 to-primary/5 p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Badge variant="mint" className="font-bold uppercase tracking-wide">PLANO RECOMENDADO PARA VOCÊ</Badge>
-                <Badge variant="mint">Melhor custo-benefício*</Badge>
+                <Badge variant="mint">Opção para comparar*</Badge>
               </div>
               <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
@@ -121,7 +121,7 @@ export default function IndexPage() {
                 <p className="whitespace-nowrap text-xl font-bold">{money(plan.price)} <span className="text-sm font-normal text-muted-foreground">/mês</span></p>
               </div>
               <div className="mt-4 grid min-w-0 gap-2 sm:grid-cols-2">
-                <Button variant="success" className="h-auto min-h-11 w-full min-w-0 whitespace-normal break-words px-3 py-2 text-center leading-5" onClick={() => goToPlans(plan.name, plan.price)}>Contratar este plano</Button>
+                <Button variant="success" className="h-auto min-h-11 w-full min-w-0 whitespace-normal break-words px-3 py-2 text-center leading-5" onClick={() => goToPlans(plan.name, plan.price)}>Selecionar para comparar</Button>
                 <Button variant="outline" className="h-auto min-h-11 w-full min-w-0 whitespace-normal break-words px-3 py-2 text-center leading-5" onClick={() => navigate("/meu-seguro")}>Ver Proteção (R$ 24,90) e Renda (R$ 39,90)</Button>
               </div>
               <p className="mt-3 text-xs text-muted-foreground">*Rótulo visual e estimativa demonstrativos, sem avaliação de condições reais. O botão apenas abre a comparação; não gera contrato, cobrança ou cobertura.</p>
@@ -143,7 +143,7 @@ export default function IndexPage() {
               { href: "/meu-seguro", title: "Entender meu seguro", description: "Compare opções e conceitos em linguagem simples.", icon: ShieldPlus, color: "bg-amber-100 text-amber-800" },
               { href: "/saude-feminina", title: "Saúde Feminina", description: "Registre informações do ciclo neste dispositivo.", icon: HeartHandshake, color: "bg-feminine/10 text-feminine" },
             ].map(({ href, title, description, icon: Icon, color }) => (
-              <Link key={href} to={href} className="group flex min-h-24 items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Link key={href} to={href} className={`group flex min-h-24 items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${href === "/saude-feminina" ? "pr-14 sm:pr-4" : ""}`}>
                 <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${color}`}><Icon className="h-6 w-6" /></span>
                 <span className="min-w-0 flex-1"><span className="block font-semibold">{title}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{description}</span></span>
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:text-primary"><ChevronRight className="h-4 w-4" /></span>
@@ -175,9 +175,9 @@ export default function IndexPage() {
       <section className="px-4 py-4">
         <Card className="mx-auto max-w-3xl">
           <CardContent className="p-5">
-            <div className="flex items-center justify-between"><div><h2 className="font-bold">Meu cashback</h2><p className="text-sm text-muted-foreground">Ganhe cashback aprendendo</p></div><Badge variant="mint">Resgatável*</Badge></div>
+            <div className="flex items-center justify-between"><div><h2 className="font-bold">Meu cashback</h2><p className="text-sm text-muted-foreground">Ganhe cashback aprendendo</p></div><Badge variant="mint">Saldo demonstrativo</Badge></div>
             <div className="mt-4 flex items-end justify-between gap-3"><span className="text-4xl font-bold">{money(cashbackAvailable)}</span><span className="text-right text-sm text-muted-foreground">R$ 1 a cada 50 pts conquistados</span></div>
-            <Button variant="success" className="mt-4 w-full" disabled={cashbackAvailable < 1} onClick={redeemCashback}>{cashbackAvailable > 0 ? "Resgatar" : "Acumule pontos para simular"}</Button>
+            <Button variant="success" className="mt-4 w-full" disabled={cashbackAvailable < 1} onClick={redeemCashback}>{cashbackAvailable > 0 ? "Simular resgate" : "Acumule pontos para simular"}</Button>
             <p className="mt-2 text-center text-xs text-muted-foreground">*Simulação local: não há pagamento nem resgate em dinheiro.</p>
           </CardContent>
         </Card>
@@ -202,7 +202,7 @@ export default function IndexPage() {
       <section id="politica-de-privacidade" className="px-4 py-5">
         <div className="mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border bg-card p-4">
           <LockKeyhole className="h-5 w-5 shrink-0 text-primary" />
-          <div className="min-w-0 flex-1"><p className="text-sm text-muted-foreground">Seus dados são seus. Veja como os usamos com ética e clareza.</p><details className="mt-2 text-xs"><summary className="w-fit cursor-pointer font-semibold text-primary">Ver política</summary><p className="mt-2 leading-5 text-muted-foreground">As informações deste protótipo são armazenadas no navegador e não são enviadas a um serviço. O armazenamento local não é criptografado; evite inserir dados pessoais ou de saúde.</p></details></div>
+          <div className="min-w-0 flex-1"><p className="text-sm text-muted-foreground">Os dados da demonstração ficam no armazenamento local do navegador.</p><Link to="/privacidade" className="mt-2 inline-block text-xs font-semibold text-primary underline-offset-4 hover:underline">Ver política e como apagar os dados</Link></div>
         </div>
       </section>
       <HealthDisclaimerFooter />

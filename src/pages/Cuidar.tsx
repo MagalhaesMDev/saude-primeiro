@@ -66,8 +66,8 @@ export default function CuidarPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background pb-28 pt-16">
-      <section className="px-4 pb-4 pt-7">
+    <main className="min-h-screen bg-background pb-28 pt-14">
+      <section className="px-4 pb-2 pt-3">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div>
             <p className="mb-1 text-[10px] font-bold tracking-[0.16em] text-success">● SEU BEM-ESTAR DIÁRIO</p>
@@ -78,14 +78,14 @@ export default function CuidarPage() {
         </div>
       </section>
 
-      <section className="px-4 py-4">
+      <section className="px-4 py-1">
         <Card className="mx-auto max-w-3xl overflow-hidden border-success/15">
-          <CardContent className="p-5">
+          <CardContent className="p-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><Flame className="h-5 w-5" /></span><div><h2 className="font-bold">Ofensiva de Cuidado</h2><p className="mt-1 text-xs text-muted-foreground">{streakDays > 0 ? "Sua sequência é uma demonstração para este protótipo." : "Conclua um lembrete para iniciar sua sequência."}</p></div></div>
               <Badge variant="mint">{dailyPointsDate === todayKey && dailyPoints >= 100 ? "Limite diário atingido" : earnedCarePointsToday ? "+5 pts hoje (demo)" : "+5 pts ao concluir (demo)"}</Badge>
             </div>
-            <div className="my-5 flex items-center justify-center gap-2 sm:gap-3">
+            <div className="my-1 flex items-center justify-center gap-2 sm:my-2 sm:gap-3">
               <span className="text-4xl font-bold text-primary">{streakDays}</span><span className="mr-2 text-sm text-muted-foreground">dias</span>
               <div className="flex flex-1 justify-between gap-1">
                 {DAYS.map((day, index) => {
@@ -94,7 +94,7 @@ export default function CuidarPage() {
                   const isFuture = date > today;
                   const pastDaysAgo = Math.floor((today.getTime() - date.getTime()) / 86400000);
                   const checked = !isFuture && (isToday ? completedToday : pastDaysAgo < streakDays);
-                  return <div key={day} className="flex flex-1 flex-col items-center gap-1"><span className={`flex h-8 w-8 items-center justify-center rounded-full ${isToday ? "ring-2 ring-primary ring-offset-2" : ""} ${checked ? "bg-success text-white" : isFuture ? "bg-muted text-muted-foreground" : "bg-muted text-muted-foreground"}`}>{checked ? <Check className="h-4 w-4" /> : isFuture ? <Clock3 className="h-3.5 w-3.5" /> : <span className="text-[9px]">{date.getDate()}</span>}</span><span className={`text-[9px] ${isToday ? "font-bold text-primary" : "text-muted-foreground"}`}>{day}</span></div>;
+                  return <div key={day} className="flex flex-1 flex-col items-center gap-1"><span className={`flex h-8 w-8 items-center justify-center rounded-full ${isToday ? "ring-2 ring-primary ring-offset-2" : ""} ${checked ? "bg-success text-success-foreground" : isFuture ? "bg-muted text-muted-foreground" : "bg-muted text-muted-foreground"}`}>{checked ? <Check className="h-4 w-4" /> : isFuture ? <Clock3 className="h-3.5 w-3.5" /> : <span className="text-[9px]">{date.getDate()}</span>}</span><span className={`text-[9px] ${isToday ? "font-bold text-primary" : "text-muted-foreground"}`}>{day}</span></div>;
                 })}
               </div>
             </div>
@@ -103,20 +103,20 @@ export default function CuidarPage() {
         </Card>
       </section>
 
-      <section className="px-4 py-2">
+      <section className="px-4 py-1">
         <div className="mx-auto max-w-3xl">
           <FemaleHealthShortcut />
         </div>
       </section>
 
-      <section className="px-4 py-4">
+      <section className="px-4 py-1">
         <div className="mx-auto max-w-3xl">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-2xl bg-primary/10 p-1">
-              <TabsTrigger value="agenda" className="min-h-11 min-w-[78px] flex-1 gap-1 px-2 py-2 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-white"><CalendarDays className="h-4 w-4" />Agenda</TabsTrigger>
-              <TabsTrigger value="cofre" className="min-h-11 min-w-[78px] flex-1 gap-1 px-2 py-2 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-white"><FileHeart className="h-4 w-4" />Cofre</TabsTrigger>
-              <TabsTrigger value="consultas" className="min-h-11 min-w-[92px] flex-1 gap-1 px-2 py-2 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-white"><Video className="h-4 w-4" />Consultas</TabsTrigger>
-              <TabsTrigger value="descontos" className="min-h-11 min-w-[92px] flex-1 gap-1 px-2 py-2 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-white"><TicketPercent className="h-4 w-4" />Descontos</TabsTrigger>
+            <TabsList className="scrollbar-hidden flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-2xl bg-primary/10 p-1">
+              <TabsTrigger value="agenda" className="min-h-11 min-w-[78px] flex-1 gap-1 px-2 py-2 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><CalendarDays className="h-4 w-4" />Agenda</TabsTrigger>
+              <TabsTrigger value="cofre" className="min-h-11 min-w-[78px] flex-1 gap-1 px-2 py-2 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><FileHeart className="h-4 w-4" />Cofre</TabsTrigger>
+              <TabsTrigger value="consultas" className="min-h-11 min-w-[92px] flex-1 gap-1 px-2 py-2 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Video className="h-4 w-4" />Consultas</TabsTrigger>
+              <TabsTrigger value="descontos" className="min-h-11 min-w-[92px] flex-1 gap-1 px-2 py-2 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><TicketPercent className="h-4 w-4" />Descontos</TabsTrigger>
             </TabsList>
 
             <TabsContent value="agenda" className="mt-5 space-y-4">
@@ -140,7 +140,7 @@ export default function CuidarPage() {
                   {weekDates.map((date, index) => {
                     const isToday = localDateKey(date) === todayKey;
                     const kinds = reminders.filter((reminder) => localDateKey(new Date(reminder.scheduledAt)) === localDateKey(date)).map((reminder) => reminder.type);
-                    return <div key={localDateKey(date)} className={`flex min-h-[72px] flex-col items-center justify-center rounded-xl ${isToday ? "bg-primary text-white shadow-sm" : "bg-muted/50"}`}><span className={`text-[9px] font-semibold ${isToday ? "text-white/80" : "text-muted-foreground"}`}>{DAYS[index]}</span><span className="text-sm font-bold">{date.getDate()}</span>{isToday && <span className="text-[8px] font-bold">HOJE</span>}<span className="mt-1 flex h-2 gap-0.5">{[...new Set(kinds)].slice(0, 3).map((kind) => <i key={kind} aria-label={TYPE_LABEL[kind] ?? "Lembrete"} className={`h-1.5 w-1.5 rounded-full ${isToday ? "bg-white" : TYPE_COLOR[kind] ?? "bg-muted-foreground"}`} />)}</span></div>;
+                    return <div key={localDateKey(date)} className={`flex min-h-[72px] flex-col items-center justify-center rounded-xl ${isToday ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted/50"}`}><span className={`text-[9px] font-semibold ${isToday ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{DAYS[index]}</span><span className="text-sm font-bold">{date.getDate()}</span>{isToday && <span className="text-[8px] font-bold">HOJE</span>}<span className="mt-1 flex h-2 gap-0.5">{[...new Set(kinds)].slice(0, 3).map((kind) => <i key={kind} aria-label={TYPE_LABEL[kind] ?? "Lembrete"} className={`h-1.5 w-1.5 rounded-full ${isToday ? "bg-primary-foreground" : TYPE_COLOR[kind] ?? "bg-muted-foreground"}`} />)}</span></div>;
                   })}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-muted-foreground">{[["EXAM", "Exame"], ["CONSULTATION", "Consulta"], ["VACCINE", "Vacina"]].map(([key, label]) => <span key={key} className="flex items-center gap-1"><i className={`h-2 w-2 rounded-full ${TYPE_COLOR[key]}`} />{label}</span>)}</div>

@@ -22,7 +22,7 @@ export function BottomNav() {
   const isFeminine = location.pathname === "/saude-feminina";
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md ${isFeminine ? "border-[#F7E7EC] bg-[#FFF8F9]/95" : "border-border bg-background/95"}`}>
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md ${isFeminine ? "border-feminine/15 bg-feminine-background/95" : "border-border bg-background/95"}`}>
       <div className="mx-auto flex h-16 max-w-3xl items-center justify-around px-2 sm:px-4">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -44,7 +44,7 @@ export function BottomNav() {
               <div className="relative">
                 <Icon className="w-5 h-5" />
                 {item.label === "Aprender" && (
-                  <span aria-label="3 lições disponíveis" className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-success px-1 text-[9px] font-bold text-white">3</span>
+                  <span aria-label="3 lições disponíveis" className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-success px-1 text-[9px] font-bold text-success-foreground">3</span>
                 )}
               </div>
               <span className="text-[10px] font-medium">{item.label}</span>

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const SECTION_LABELS: Record<string, string> = {
   "/": "Início",
@@ -13,6 +14,8 @@ const SECTION_LABELS: Record<string, string> = {
   "/cuidar": "Cuidar de Mim",
   "/aprender": "Aprender",
   "/saude-feminina": "Saúde Feminina",
+  "/privacidade": "Privacidade",
+  "/termos": "Termos de Uso",
 };
 
 interface HeaderProps {
@@ -34,7 +37,7 @@ export function Header({ className }: HeaderProps) {
       className={cn(
         "fixed left-0 right-0 top-0 z-50 border-b backdrop-blur-md",
         isFeminine
-          ? "border-[#F7E7EC]/70 bg-[#FFF8F9]/95"
+          ? "border-feminine/15 bg-feminine-background/95"
           : "border-border bg-background/95",
         className
       )}
@@ -45,7 +48,7 @@ export function Header({ className }: HeaderProps) {
             "flex h-8 w-8 items-center justify-center rounded-lg",
             isFeminine ? "bg-gradient-to-tr from-feminine to-pink-300 text-white" : "bg-primary"
           )}>
-            {isFeminine ? <Flower2 className="h-5 w-5" /> : <Shield className="h-5 w-5 text-white" />}
+            {isFeminine ? <Flower2 className="h-5 w-5" /> : <Shield className="h-5 w-5 text-primary-foreground" />}
           </div>
           <div>
             <h1 className={cn("text-sm font-bold leading-tight", isFeminine ? "text-foreground" : "text-primary")}>
@@ -59,9 +62,10 @@ export function Header({ className }: HeaderProps) {
           </div>
         </div>
 
-        <div className="relative flex items-center gap-3">
+        <div className="relative flex items-center gap-1">
           <span className="sr-only">Seus dados ficam neste dispositivo neste protótipo.</span>
           <Shield aria-hidden="true" className={cn("h-5 w-5", isFeminine ? "text-feminine" : "text-primary")} />
+          <ThemeToggle />
           {user ? (
             <Button
               variant="ghost"

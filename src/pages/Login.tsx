@@ -46,12 +46,12 @@ export default function LoginPage() {
             <Shield className="w-6 h-6 text-white" />
           </div>
           <CardTitle className="text-2xl">
-            {isRecovery ? "Recuperar senha" : isRegister ? "Criar conta de demonstração" : "Bem-vindo de volta"}
+            {isRecovery ? "Recuperar senha" : isRegister ? "Criar conta de demonstração" : "Entrar na demonstração"}
           </CardTitle>
           <CardDescription>
             {isRecovery
-              ? "Informe seu e-mail para ver as opções disponíveis."
-              : "Acesse o protótipo usando qualquer e-mail e senha."}
+              ? "A recuperação de conta não está disponível nesta demonstração."
+              : "Use dados fictícios para explorar o protótipo; nenhuma conta real será criada."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,7 +69,7 @@ export default function LoginPage() {
             </div>
             {!isRecovery && <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">Senha fictícia</Label>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -81,18 +81,14 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="Não use sua senha verdadeira"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>}
-            {!isRecovery && <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" className="rounded border-gray-300 text-primary" />
-                Lembrar de mim
-              </label>
-              <Link to="/esqueci-senha" className="text-sm text-primary hover:underline">
+            {!isRecovery && <div className="flex justify-end">
+              <Link to="/esqueci-senha" className="min-h-11 inline-flex items-center text-sm text-primary hover:underline">
                 Esqueci minha senha
               </Link>
             </div>}
@@ -109,23 +105,14 @@ export default function LoginPage() {
               {isRegister ? "Entrar" : "Cadastre-se"}
             </Link>
           </p>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Ou continue com
-              </span>
-            </div>
-          </div>
           <p className="text-xs text-center text-muted-foreground">
-            Sessão de demonstração salva somente neste navegador. Não use dados reais.
+            Demonstração: qualquer senha fictícia é aceita e não é salva. A autenticação não é real.
           </p>
         </CardFooter>
       </Card>
       <p className="w-full max-w-md text-center text-xs text-muted-foreground">
-        Ao criar uma conta, você concorda com nossos Termos de Uso e Política de Privacidade.
+        Leia os <Link to="/termos" className="text-primary underline-offset-4 hover:underline">termos da demonstração</Link> e a{" "}
+        <Link to="/privacidade" className="text-primary underline-offset-4 hover:underline">privacidade no protótipo</Link>.
       </p>
     </main>
   );

@@ -16,6 +16,7 @@ describe("prototypeStore", () => {
       quizAnswered: false,
       quizCorrect: null,
       quizSelectedAnswer: null,
+      quizRewardClaimed: false,
       trailProgress: { work: 3, women: 0, men: 0, family: 0, wellness: 0 },
       dailyPoints: 0,
       dailyPointsDate: new Date().toLocaleDateString("en-CA"),
@@ -83,6 +84,21 @@ describe("prototypeStore", () => {
     expect(usePrototypeStore.getState().quizCorrect).toBe(false);
     expect(usePrototypeStore.getState().quizSelectedAnswer).toBe(0);
     expect(usePrototypeStore.getState().points).toBe(0);
+  });
+
+  it("allows retrying a wrong answer and awards quiz points only once", () => {
+    const store = usePrototypeStore.getState();
+    store.answerQuiz(0);
+    store.resetQuiz();
+    usePrototypeStore.getState().answerQuiz(1);
+    const pointsAfterCorrect = usePrototypeStore.getState().points;
+
+    usePrototypeStore.getState().resetQuiz();
+    usePrototypeStore.getState().answerQuiz(1);
+
+    expect(pointsAfterCorrect).toBe(10);
+    expect(usePrototypeStore.getState().points).toBe(pointsAfterCorrect);
+    expect(usePrototypeStore.getState().quizRewardClaimed).toBe(true);
   });
 
   it("does not award quiz points above the daily limit", () => {
