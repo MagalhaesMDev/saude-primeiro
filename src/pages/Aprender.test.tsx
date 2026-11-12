@@ -53,4 +53,17 @@ describe("AprenderPage", () => {
     expect(screen.getByText("Filtro ativo: Todos")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Deslocamentos com mais atenção" })).toBeInTheDocument();
   });
+
+  it("explica termos comuns no tradutor de seguros", () => {
+    renderAprenderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: /Apólice/ }));
+    expect(screen.getByText(/reúne as condições do seguro/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Prêmio/ }));
+    expect(screen.getByText(/valor pago pelo seguro/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Indenizar/ }));
+    expect(screen.getByText(/pagar ou compensar um prejuízo coberto/i)).toBeInTheDocument();
+  });
 });

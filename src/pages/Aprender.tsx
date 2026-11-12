@@ -33,9 +33,20 @@ const FILTERS: { label: string; value: TrailAudience }[] = [
 ];
 
 const GLOSSARY = [
+  { term: "Apólice", definition: "Documento que reúne as condições do seguro, como coberturas, limites, exclusões e vigência." },
+  { term: "Prêmio", definition: "Valor pago pelo seguro, conforme a forma e as condições previstas no contrato. Não é um prêmio ou recompensa." },
+  { term: "Cobertura", definition: "Proteção prevista no contrato para determinadas situações, sempre sujeita às condições e aos limites definidos." },
+  { term: "Segurado", definition: "Pessoa cuja vida, saúde, renda ou bem está protegido pelo seguro, de acordo com o contrato." },
+  { term: "Seguradora", definition: "Empresa autorizada que oferece o seguro e analisa pedidos conforme o contrato e as regras aplicáveis." },
+  { term: "Beneficiário", definition: "Pessoa indicada para receber uma indenização quando as condições do contrato forem atendidas." },
+  { term: "Indenizar", definition: "Pagar ou compensar um prejuízo coberto, após análise e conforme as condições, os limites e as exclusões do contrato." },
+  { term: "Vigência", definition: "Período em que o contrato de seguro está válido, conforme as datas e condições estabelecidas." },
   { term: "Carência", definition: "Período de espera indicado no contrato antes de determinada cobertura poder ser utilizada. Regras variam por produto." },
   { term: "Sinistro", definition: "Ocorrência que pode ser comunicada à seguradora para análise conforme as condições da apólice." },
   { term: "Franquia", definition: "Participação financeira definida no contrato que pode caber ao segurado em determinadas situações." },
+  { term: "Exclusão", definition: "Situação ou condição que o contrato não cobre. É importante consultar a lista de exclusões antes de contratar." },
+  { term: "Limite de cobertura", definition: "Valor máximo previsto para uma cobertura, de acordo com o contrato e com as condições do seguro." },
+  { term: "Capital segurado", definition: "Valor máximo definido para uma cobertura, usado como referência para calcular eventual indenização." },
   { term: "DIT (Diária por Incapacidade Temporária)", definition: "Cobertura que pode prever pagamento diário quando os critérios de incapacidade e demais condições do contrato forem atendidos." },
 ];
 
