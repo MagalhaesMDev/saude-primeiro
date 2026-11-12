@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { LESSON_TRAILS, type LessonProgress } from "@/data/lessons";
 
 export interface LocalReminder {
   id: string;
@@ -27,14 +28,14 @@ function getLocalDateString(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function addDailyPoints(state: PrototypeState, amount: number): Pick<PrototypeState, "points" | "dailyPoints" | "dailyPointsDate"> {
+function addDailyPoints(state: PrototypeState, amount: number): Pick<PrototypeState, "points" | "pointsToday" | "pointsDate"> {
   const today = getLocalDateString(new Date());
-  const alreadyEarned = state.dailyPointsDate === today ? state.dailyPoints : 0;
+  const alreadyEarned = state.pointsDate === today ? state.pointsToday : 0;
   const awarded = Math.min(amount, Math.max(100 - alreadyEarned, 0));
   return {
     points: state.points + awarded,
-    dailyPoints: alreadyEarned + awarded,
-    dailyPointsDate: today,
+    pointsToday: alreadyEarned + awarded,
+    pointsDate: today,
   };
 }
 
@@ -74,16 +75,12 @@ interface PrototypeState {
   cycleLogs: CycleLog[];
   cycleStartDate: string;
   cycleLength: number;
-  completedLessons: string[];
+  lessonProgress: Record<string, LessonProgress>;
   points: number;
+  cashbackEarned: number;
   cashbackRedeemedCount: number;
-  quizAnswered: boolean;
-  quizCorrect: boolean | null;
-  quizSelectedAnswer: number | null;
-  quizRewardClaimed: boolean;
-  trailProgress: Record<string, number>;
-  dailyPoints: number;
-  dailyPointsDate: string;
+  pointsToday: number;
+  pointsDate: string;
   streakDays: number;
   streakLastDate: string;
   carePointsDate: string;
@@ -93,11 +90,20 @@ interface PrototypeState {
   completeReminder: (id: string) => void;
   saveCycleLog: (log: Omit<CycleLog, "date">) => void;
   setCycleSettings: (startDate: string, length: number) => void;
-  completeLesson: (title: string) => void;
-  completeTrailLesson: (trailId: string, lessonTitle: string) => void;
-  answerQuiz: (selectedAnswer: number) => void;
-  resetQuiz: () => void;
+  completeLesson: (
+    lessonId: string,
+    quizScore: number,
+    points: number,
+    cashback: number,
+  ) => LessonCompletionResult;
   redeemCashback: () => void;
+}
+
+export interface LessonCompletionResult {
+  awardedPoints: number;
+  awardedCashback: number;
+  dailyLimitReached: boolean;
+  alreadyCompleted: boolean;
 }
 
 type PersistedPrototypeState = Omit<
@@ -109,9 +115,6 @@ type PersistedPrototypeState = Omit<
   | "saveCycleLog"
   | "setCycleSettings"
   | "completeLesson"
-  | "completeTrailLesson"
-  | "answerQuiz"
-  | "resetQuiz"
   | "redeemCashback"
 >;
 
@@ -122,16 +125,12 @@ const INITIAL_PERSISTED_STATE: PersistedPrototypeState = {
   cycleLogs: [],
   cycleStartDate: "",
   cycleLength: 28,
-  completedLessons: [],
+  lessonProgress: {},
   points: 280,
+  cashbackEarned: 5,
   cashbackRedeemedCount: 0,
-  quizAnswered: false,
-  quizCorrect: null,
-  quizSelectedAnswer: null,
-  quizRewardClaimed: false,
-  trailProgress: { work: 3, women: 0, men: 0, family: 0, wellness: 0 },
-  dailyPoints: 25,
-  dailyPointsDate: getLocalDateString(new Date()),
+  pointsToday: 25,
+  pointsDate: getLocalDateString(new Date()),
   streakDays: 6,
   streakLastDate: getLocalDateString(new Date()),
   carePointsDate: "",
@@ -143,6 +142,53 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((entry) => typeof entry === "string");
+}
+
+function readLessonProgress(value: unknown): Record<string, LessonProgress> | null {
+  if (!isRecord(value)) return null;
+  const progress: Record<string, LessonProgress> = {};
+  for (const [lessonId, entry] of Object.entries(value)) {
+    if (
+      !isRecord(entry)
+      || typeof entry.completed !== "boolean"
+      || typeof entry.quizScore !== "number"
+      || !Number.isFinite(entry.quizScore)
+      || typeof entry.completedAt !== "string"
+    ) return null;
+    progress[lessonId] = {
+      completed: entry.completed,
+      quizScore: Math.max(0, Math.floor(entry.quizScore)),
+      completedAt: entry.completedAt,
+    };
+  }
+  return progress;
+}
+
+function migrateLessonProgress(value: Record<string, unknown>): Record<string, LessonProgress> {
+  const currentProgress = readLessonProgress(value.lessonProgress);
+  if (currentProgress) return currentProgress;
+
+  const progress: Record<string, LessonProgress> = {};
+  const completedAt = new Date().toISOString();
+  const legacyTrailProgress = isRecord(value.trailProgress) ? value.trailProgress : {};
+  for (const trail of LESSON_TRAILS) {
+    const legacyCount = legacyTrailProgress[trail.id];
+    if (typeof legacyCount !== "number" || !Number.isFinite(legacyCount)) continue;
+    const count = Math.min(Math.max(Math.floor(legacyCount), 0), trail.lessons.length);
+    for (const lesson of trail.lessons.slice(0, count)) {
+      progress[lesson.id] = { completed: true, quizScore: 0, completedAt };
+    }
+  }
+
+  if (isStringArray(value.completedLessons)) {
+    for (const legacyValue of value.completedLessons) {
+      const lesson = LESSON_TRAILS
+        .flatMap((trail) => trail.lessons)
+        .find((entry) => entry.id === legacyValue || entry.title === legacyValue);
+      if (lesson) progress[lesson.id] = { completed: true, quizScore: 0, completedAt };
+    }
+  }
+  return progress;
 }
 
 function readReminders(value: unknown): LocalReminder[] | null {
@@ -208,10 +254,14 @@ function migratePrototypeState(value: unknown): PersistedPrototypeState {
     && typeof value.selectedPlan.price === "number"
     ? { name: value.selectedPlan.name, price: value.selectedPlan.price }
     : null;
-  const trailProgress = isRecord(value.trailProgress)
-    && Object.values(value.trailProgress).every((count) => typeof count === "number" && Number.isFinite(count))
-    ? value.trailProgress as Record<string, number>
-    : INITIAL_PERSISTED_STATE.trailProgress;
+  const points = typeof value.points === "number" && Number.isFinite(value.points)
+    ? Math.max(value.points, 0)
+    : INITIAL_PERSISTED_STATE.points;
+  const pointsDate = typeof value.pointsDate === "string"
+    ? value.pointsDate
+    : typeof value.dailyPointsDate === "string"
+      ? value.dailyPointsDate
+      : INITIAL_PERSISTED_STATE.pointsDate;
 
   return {
     ...INITIAL_PERSISTED_STATE,
@@ -223,20 +273,20 @@ function migratePrototypeState(value: unknown): PersistedPrototypeState {
     cycleLength: typeof value.cycleLength === "number" && value.cycleLength >= 21 && value.cycleLength <= 45
       ? value.cycleLength
       : INITIAL_PERSISTED_STATE.cycleLength,
-    completedLessons: isStringArray(value.completedLessons) ? value.completedLessons : [],
-    points: typeof value.points === "number" && Number.isFinite(value.points) ? Math.max(value.points, 0) : INITIAL_PERSISTED_STATE.points,
+    lessonProgress: migrateLessonProgress(value),
+    points,
+    cashbackEarned: typeof value.cashbackEarned === "number" && Number.isFinite(value.cashbackEarned)
+      ? Math.max(value.cashbackEarned, 0)
+      : Math.floor(points / 50),
     cashbackRedeemedCount: typeof value.cashbackRedeemedCount === "number" && Number.isFinite(value.cashbackRedeemedCount)
       ? Math.max(value.cashbackRedeemedCount, 0)
       : INITIAL_PERSISTED_STATE.cashbackRedeemedCount,
-    quizAnswered: false,
-    quizCorrect: null,
-    quizSelectedAnswer: null,
-    quizRewardClaimed: value.quizRewardClaimed === true || (value.quizAnswered === true && value.quizCorrect === true),
-    trailProgress,
-    dailyPoints: typeof value.dailyPoints === "number" && Number.isFinite(value.dailyPoints)
-      ? Math.min(Math.max(value.dailyPoints, 0), 100)
-      : INITIAL_PERSISTED_STATE.dailyPoints,
-    dailyPointsDate: typeof value.dailyPointsDate === "string" ? value.dailyPointsDate : INITIAL_PERSISTED_STATE.dailyPointsDate,
+    pointsToday: typeof value.pointsToday === "number" && Number.isFinite(value.pointsToday)
+      ? Math.min(Math.max(value.pointsToday, 0), 100)
+      : typeof value.dailyPoints === "number" && Number.isFinite(value.dailyPoints)
+        ? Math.min(Math.max(value.dailyPoints, 0), 100)
+        : INITIAL_PERSISTED_STATE.pointsToday,
+    pointsDate,
     streakDays: typeof value.streakDays === "number" && Number.isFinite(value.streakDays)
       ? Math.max(value.streakDays, 0)
       : INITIAL_PERSISTED_STATE.streakDays,
@@ -273,7 +323,7 @@ export const usePrototypeStore = create<PrototypeState>()(
               ? state.streakDays + 1
               : 1;
           const canEarnCarePoints = state.carePointsDate !== today
-            && (state.dailyPointsDate !== today || state.dailyPoints < 100);
+            && (state.pointsDate !== today || state.pointsToday < 100);
           return {
             reminders: state.reminders.map((entry) =>
               entry.id === id
@@ -296,54 +346,58 @@ export const usePrototypeStore = create<PrototypeState>()(
         })),
       setCycleSettings: (startDate, length) =>
         set({ cycleStartDate: startDate, cycleLength: length }),
-      completeLesson: (title) =>
-        set((state) =>
-          state.completedLessons.includes(title)
-            ? state
-            : {
-                completedLessons: [...state.completedLessons, title],
-                ...addDailyPoints(state, 10),
-              }
-        ),
-      completeTrailLesson: (trailId, lessonTitle) =>
+      completeLesson: (lessonId, quizScore, pointsReward, cashbackReward) => {
+        let result: LessonCompletionResult = {
+          awardedPoints: 0,
+          awardedCashback: 0,
+          dailyLimitReached: false,
+          alreadyCompleted: false,
+        };
+        if (
+          !lessonId
+          || !Number.isInteger(quizScore)
+          || quizScore < 0
+          || !Number.isFinite(pointsReward)
+          || pointsReward < 0
+          || !Number.isFinite(cashbackReward)
+          || cashbackReward < 0
+        ) return result;
+
         set((state) => {
-          const completedCount = state.trailProgress[trailId] ?? 0;
-          if (completedCount >= 5) return state;
-          return {
-            trailProgress: { ...state.trailProgress, [trailId]: completedCount + 1 },
-            completedLessons: state.completedLessons.includes(lessonTitle)
-              ? state.completedLessons
-              : [...state.completedLessons, lessonTitle],
-            ...addDailyPoints(state, 10),
+          if (state.lessonProgress[lessonId]?.completed) {
+            result = { ...result, alreadyCompleted: true };
+            return state;
+          }
+          const today = getLocalDateString(new Date());
+          const pointsToday = state.pointsDate === today ? state.pointsToday : 0;
+          const awardedPoints = Math.min(pointsReward, Math.max(100 - pointsToday, 0));
+          result = {
+            awardedPoints,
+            awardedCashback: cashbackReward,
+            dailyLimitReached: awardedPoints < pointsReward,
+            alreadyCompleted: false,
           };
-        }),
-      answerQuiz: (selectedAnswer) =>
-        set((state) =>
-          state.quizAnswered || !Number.isInteger(selectedAnswer) || selectedAnswer < 0 || selectedAnswer > 2
-            ? state
-            : {
-                quizAnswered: true,
-                quizCorrect: selectedAnswer === 1,
-                quizSelectedAnswer: selectedAnswer,
-                quizRewardClaimed: state.quizRewardClaimed || selectedAnswer === 1,
-                ...addDailyPoints(state, selectedAnswer === 1 && !state.quizRewardClaimed ? 10 : 0),
-              }
-        ),
-      resetQuiz: () =>
-        set((state) => state.quizCorrect === true
-          ? state
-          : { quizAnswered: false, quizCorrect: null, quizSelectedAnswer: null }),
+          return {
+            lessonProgress: {
+              ...state.lessonProgress,
+              [lessonId]: { completed: true, quizScore, completedAt: new Date().toISOString() },
+            },
+            points: state.points + awardedPoints,
+            pointsToday: pointsToday + awardedPoints,
+            pointsDate: today,
+            cashbackEarned: state.cashbackEarned + cashbackReward,
+          };
+        });
+        return result;
+      },
       redeemCashback: () =>
-        set((state) => ({
-          cashbackRedeemedCount: Math.min(
-            state.cashbackRedeemedCount + 1,
-            Math.floor(state.points / 50)
-          ),
-        })),
+        set((state) => state.cashbackRedeemedCount >= Math.floor(state.cashbackEarned)
+          ? state
+          : { cashbackRedeemedCount: state.cashbackRedeemedCount + 1 }),
     }),
     {
       name: "saude-primeiro-prototype",
-      version: 4,
+      version: 5,
       migrate: migratePrototypeState,
       partialize: (state) => ({
         selectedPlan: state.selectedPlan,
@@ -352,16 +406,12 @@ export const usePrototypeStore = create<PrototypeState>()(
         cycleLogs: state.cycleLogs,
         cycleStartDate: state.cycleStartDate,
         cycleLength: state.cycleLength,
-        completedLessons: state.completedLessons,
+        lessonProgress: state.lessonProgress,
         points: state.points,
+        cashbackEarned: state.cashbackEarned,
         cashbackRedeemedCount: state.cashbackRedeemedCount,
-        quizAnswered: state.quizAnswered,
-        quizCorrect: state.quizCorrect,
-        quizSelectedAnswer: state.quizSelectedAnswer,
-        quizRewardClaimed: state.quizRewardClaimed,
-        trailProgress: state.trailProgress,
-        dailyPoints: state.dailyPoints,
-        dailyPointsDate: state.dailyPointsDate,
+        pointsToday: state.pointsToday,
+        pointsDate: state.pointsDate,
         streakDays: state.streakDays,
         streakLastDate: state.streakLastDate,
         carePointsDate: state.carePointsDate,

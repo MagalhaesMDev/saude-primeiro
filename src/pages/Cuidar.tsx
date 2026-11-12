@@ -37,7 +37,7 @@ export default function CuidarPage() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [documentCategory, setDocumentCategory] = useState("Exames");
   const [documents, setDocuments] = useState<Array<{ name: string; category: string }>>([]);
-  const { reminders, addReminder, completeReminder, streakDays, streakLastDate, carePointsDate, dailyPointsDate, dailyPoints } = usePrototypeStore();
+  const { reminders, addReminder, completeReminder, streakDays, streakLastDate, carePointsDate, pointsDate, pointsToday } = usePrototypeStore();
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const monday = new Date(today);
@@ -83,7 +83,7 @@ export default function CuidarPage() {
           <CardContent className="p-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><Flame className="h-5 w-5" /></span><div><h2 className="font-bold">Ofensiva de Cuidado</h2><p className="mt-1 text-xs text-muted-foreground">{streakDays > 0 ? "Sua sequência é uma demonstração para este protótipo." : "Conclua um lembrete para iniciar sua sequência."}</p></div></div>
-              <Badge variant="mint">{dailyPointsDate === todayKey && dailyPoints >= 100 ? "Limite diário atingido" : earnedCarePointsToday ? "+5 pts hoje (demo)" : "+5 pts ao concluir (demo)"}</Badge>
+              <Badge variant="mint">{pointsDate === todayKey && pointsToday >= 100 ? "Limite diário atingido" : earnedCarePointsToday ? "+5 pts hoje (demo)" : "+5 pts ao concluir (demo)"}</Badge>
             </div>
             <div className="my-1 flex items-center justify-center gap-2 sm:my-2 sm:gap-3">
               <span className="text-4xl font-bold text-primary">{streakDays}</span><span className="mr-2 text-sm text-muted-foreground">dias</span>

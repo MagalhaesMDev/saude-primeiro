@@ -1,30 +1,38 @@
 import { describe, it, expect } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import IndexPage from "./Index";
+import DashboardPage from "./Dashboard";
 import { usePrototypeStore } from "@/store/prototypeStore";
 
-function renderIndexPage() {
+function renderPage(page: ReactNode) {
   return render(
     <MemoryRouter>
-      <IndexPage />
+      {page}
     </MemoryRouter>
   );
 }
 
-describe("IndexPage", () => {
-  it("deve renderizar o título principal", () => {
-    renderIndexPage();
-    expect(screen.getByRole("heading", { name: /proteção que cabe no seu bolso/i })).toBeInTheDocument();
+describe("Landing page", () => {
+  it("apresenta a proposta e direciona para a demonstração", () => {
+    renderPage(<IndexPage />);
+    expect(screen.getByRole("heading", { name: /cuidar de você também é proteger o seu trabalho/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /conheça a demonstração/i })).toHaveAttribute("href", "/painel");
   });
 
-  it("deve renderizar o botão de ver planos", () => {
-    renderIndexPage();
-    expect(screen.getByRole("button", { name: /ver planos/i })).toBeInTheDocument();
+  it("explica que os depoimentos são ilustrativos e inclui FAQ acessível", () => {
+    renderPage(<IndexPage />);
+    expect(screen.getByText(/não são depoimentos de clientes/i)).toBeInTheDocument();
+    const question = screen.getByText(/este site oferece um plano de saúde ou seguro para contratar/i);
+    fireEvent.click(question);
+    expect(screen.getByText(/nenhum botão gera proposta, contrato, cobrança ou cobertura/i)).toBeVisible();
   });
+});
 
+describe("DashboardPage", () => {
   it("deve renderizar o simulador de plano", () => {
-    renderIndexPage();
+    renderPage(<DashboardPage />);
     expect(screen.getByText(/simulador em 30 segundos/i)).toBeInTheDocument();
     expect(screen.getByText(/qual plano cabe na sua rotina/i)).toBeInTheDocument();
     expect(screen.getByText(/quem você quer proteger/i)).toBeInTheDocument();
@@ -35,7 +43,7 @@ describe("IndexPage", () => {
 
   it("recalcula a recomendação e apenas seleciona o plano demonstrativo", () => {
     usePrototypeStore.setState({ selectedPlan: null });
-    renderIndexPage();
+    renderPage(<DashboardPage />);
 
     fireEvent.click(screen.getByRole("button", { name: "Acima de R$ 30" }));
     expect(screen.getByRole("heading", { name: "Renda" })).toBeInTheDocument();

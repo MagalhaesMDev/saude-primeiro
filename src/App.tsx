@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import IndexPage from "./pages/Index";
+import DashboardPage from "./pages/Dashboard";
 import MeuSeguroPage from "./pages/MeuSeguro";
 import CuidarPage from "./pages/Cuidar";
 import AprenderPage from "./pages/Aprender";
+import LessonPage from "./pages/Lesson";
 import SaudeFemininaPage from "./pages/SaudeFeminina";
 import LoginPage from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -16,14 +18,17 @@ import LegalInfoPage from "./pages/LegalInfo";
 function AppRoutes() {
   const location = useLocation();
   const isAuthRoute = ["/login", "/cadastro", "/esqueci-senha"].includes(location.pathname);
+  const isLandingPage = location.pathname === "/";
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      {!isLandingPage && <Header />}
       <Routes>
         <Route path="/" element={<IndexPage />} />
+        <Route path="/painel" element={<DashboardPage />} />
         <Route path="/meu-seguro" element={<MeuSeguroPage />} />
         <Route path="/cuidar" element={<CuidarPage />} />
         <Route path="/aprender" element={<AprenderPage />} />
+        <Route path="/aprender/:trailId/:lessonId" element={<LessonPage />} />
         <Route path="/saude-feminina" element={<SaudeFemininaPage />} />
         <Route path="/privacidade" element={<LegalInfoPage />} />
         <Route path="/termos" element={<LegalInfoPage />} />
@@ -32,7 +37,7 @@ function AppRoutes() {
         <Route path="/esqueci-senha" element={<LoginPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {!isAuthRoute && (
+      {!isAuthRoute && !isLandingPage && (
         <>
           <BottomNav />
           <FloatingSupportButton />

@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { usePrototypeStore } from "./prototypeStore";
 
+function todayKey() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+}
+
 describe("prototypeStore", () => {
   beforeEach(() => {
     usePrototypeStore.setState({
@@ -10,16 +15,12 @@ describe("prototypeStore", () => {
       cycleLogs: [],
       cycleStartDate: "",
       cycleLength: 28,
-      completedLessons: [],
+      lessonProgress: {},
       points: 0,
+      cashbackEarned: 0,
       cashbackRedeemedCount: 0,
-      quizAnswered: false,
-      quizCorrect: null,
-      quizSelectedAnswer: null,
-      quizRewardClaimed: false,
-      trailProgress: { work: 3, women: 0, men: 0, family: 0, wellness: 0 },
-      dailyPoints: 0,
-      dailyPointsDate: new Date().toLocaleDateString("en-CA"),
+      pointsToday: 0,
+      pointsDate: todayKey(),
       streakDays: 0,
       streakLastDate: "",
       carePointsDate: "",
@@ -30,10 +31,7 @@ describe("prototypeStore", () => {
     usePrototypeStore.getState().selectPlan("Essencial", 14.9);
     usePrototypeStore.getState().requestBenefit("Diária por internação");
 
-    expect(usePrototypeStore.getState().selectedPlan).toEqual({
-      name: "Essencial",
-      price: 14.9,
-    });
+    expect(usePrototypeStore.getState().selectedPlan).toEqual({ name: "Essencial", price: 14.9 });
     expect(usePrototypeStore.getState().claims).toEqual(["Diária por internação"]);
   });
 
@@ -52,91 +50,63 @@ describe("prototypeStore", () => {
   });
 
   it("awards the care reminder bonus only once per day", () => {
-    const store = usePrototypeStore.getState();
-    store.addReminder({ title: "Consulta", type: "CONSULTATION", scheduledAt: new Date().toISOString(), details: "" });
-    store.addReminder({ title: "Exame", type: "EXAM", scheduledAt: new Date().toISOString(), details: "" });
+    usePrototypeStore.getState().addReminder({ title: "Consulta", type: "CONSULTATION", scheduledAt: new Date().toISOString(), details: "" });
+    usePrototypeStore.getState().addReminder({ title: "Exame", type: "EXAM", scheduledAt: new Date().toISOString(), details: "" });
     const [consultation, exam] = usePrototypeStore.getState().reminders;
 
     usePrototypeStore.getState().completeReminder(consultation.id);
     usePrototypeStore.getState().completeReminder(exam.id);
 
     expect(usePrototypeStore.getState().points).toBe(5);
-    expect(usePrototypeStore.getState().carePointsDate).toBe(new Date().toLocaleDateString("en-CA"));
+    expect(usePrototypeStore.getState().carePointsDate).toBe(todayKey());
   });
 
-  it("awards lesson and quiz points only once", () => {
+  it("records quiz score and awards lesson rewards only once", () => {
     const store = usePrototypeStore.getState();
-    store.completeLesson("Prevenção");
-    store.completeLesson("Prevenção");
-    store.answerQuiz(1);
-    store.answerQuiz(1);
+    const first = store.completeLesson("work-ride", 2, 10, 0.2);
+    const second = usePrototypeStore.getState().completeLesson("work-ride", 1, 10, 0.2);
 
-    expect(usePrototypeStore.getState().points).toBe(20);
-    expect(usePrototypeStore.getState().completedLessons).toEqual(["Prevenção"]);
-    expect(usePrototypeStore.getState().quizCorrect).toBe(true);
-    expect(usePrototypeStore.getState().quizSelectedAnswer).toBe(1);
+    expect(first).toMatchObject({ awardedPoints: 10, awardedCashback: 0.2, alreadyCompleted: false });
+    expect(second).toMatchObject({ awardedPoints: 0, awardedCashback: 0, alreadyCompleted: true });
+    expect(usePrototypeStore.getState().lessonProgress["work-ride"]).toMatchObject({ completed: true, quizScore: 2 });
+    expect(usePrototypeStore.getState().points).toBe(10);
+    expect(usePrototypeStore.getState().cashbackEarned).toBe(0.2);
   });
 
-  it("keeps an incorrect quiz answer without awarding points", () => {
-    usePrototypeStore.getState().answerQuiz(0);
+  it("completes a lesson at the daily cap and warns without exceeding 100 points", () => {
+    usePrototypeStore.setState({ points: 95, pointsToday: 95 });
 
-    expect(usePrototypeStore.getState().quizAnswered).toBe(true);
-    expect(usePrototypeStore.getState().quizCorrect).toBe(false);
-    expect(usePrototypeStore.getState().quizSelectedAnswer).toBe(0);
-    expect(usePrototypeStore.getState().points).toBe(0);
-  });
+    const result = usePrototypeStore.getState().completeLesson("work-load", 1, 15, 0.2);
 
-  it("allows retrying a wrong answer and awards quiz points only once", () => {
-    const store = usePrototypeStore.getState();
-    store.answerQuiz(0);
-    store.resetQuiz();
-    usePrototypeStore.getState().answerQuiz(1);
-    const pointsAfterCorrect = usePrototypeStore.getState().points;
-
-    usePrototypeStore.getState().resetQuiz();
-    usePrototypeStore.getState().answerQuiz(1);
-
-    expect(pointsAfterCorrect).toBe(10);
-    expect(usePrototypeStore.getState().points).toBe(pointsAfterCorrect);
-    expect(usePrototypeStore.getState().quizRewardClaimed).toBe(true);
-  });
-
-  it("does not award quiz points above the daily limit", () => {
-    usePrototypeStore.setState({ points: 95, dailyPoints: 95 });
-    usePrototypeStore.getState().answerQuiz(1);
-
+    expect(result).toMatchObject({ awardedPoints: 5, dailyLimitReached: true, alreadyCompleted: false });
+    expect(usePrototypeStore.getState().lessonProgress["work-load"]?.completed).toBe(true);
     expect(usePrototypeStore.getState().points).toBe(100);
-    expect(usePrototypeStore.getState().dailyPoints).toBe(100);
+    expect(usePrototypeStore.getState().pointsToday).toBe(100);
+    expect(usePrototypeStore.getState().cashbackEarned).toBe(0.2);
   });
 
-  it("ignores invalid quiz answers", () => {
-    usePrototypeStore.getState().answerQuiz(4);
+  it("completes lessons without points once the daily limit is reached", () => {
+    usePrototypeStore.setState({ points: 100, pointsToday: 100 });
 
-    expect(usePrototypeStore.getState().quizAnswered).toBe(false);
-    expect(usePrototypeStore.getState().points).toBe(0);
-  });
+    const result = usePrototypeStore.getState().completeLesson("work-weather", 0, 15, 0.2);
 
-  it("tracks progress by trail and caps daily points at 100", () => {
-    usePrototypeStore.setState({ points: 95, dailyPoints: 95 });
-    const store = usePrototypeStore.getState();
-    store.completeTrailLesson("work", "Work lesson 4");
-    store.completeTrailLesson("work", "Work lesson 5");
-
-    expect(usePrototypeStore.getState().trailProgress.work).toBe(5);
+    expect(result).toMatchObject({ awardedPoints: 0, dailyLimitReached: true });
+    expect(usePrototypeStore.getState().lessonProgress["work-weather"]?.completed).toBe(true);
     expect(usePrototypeStore.getState().points).toBe(100);
-    expect(usePrototypeStore.getState().dailyPoints).toBe(100);
+    expect(usePrototypeStore.getState().cashbackEarned).toBe(0.2);
   });
 
-  it("limits demonstrative cashback redemption to earned points", () => {
-    usePrototypeStore.setState({ points: 50 });
+  it("limits simulated cashback redemption to whole earned reais", () => {
+    usePrototypeStore.setState({ cashbackEarned: 2.5 });
     const store = usePrototypeStore.getState();
     store.redeemCashback();
     store.redeemCashback();
+    store.redeemCashback();
 
-    expect(usePrototypeStore.getState().cashbackRedeemedCount).toBe(1);
+    expect(usePrototypeStore.getState().cashbackRedeemedCount).toBe(2);
   });
 
-  it("migrates demo reminder copy without dropping personal entries", async () => {
+  it("migrates old lesson progress and daily-point fields", async () => {
     const migrate = usePrototypeStore.persist.getOptions().migrate;
     expect(migrate).toBeDefined();
     const migrated = await migrate?.({
@@ -147,15 +117,26 @@ describe("prototypeStore", () => {
       cycleLogs: [{ date: "2026-11-04", mood: "😊", symptoms: [], flow: "Leve" }],
       cycleStartDate: "2026-10-25",
       cycleLength: 28,
-      completedLessons: ["Lição"],
+      completedLessons: ["work-weather"],
+      trailProgress: { work: 1 },
       points: 280,
-    }, 1);
+      dailyPoints: 35,
+      dailyPointsDate: todayKey(),
+      quizAnswered: true,
+      quizCorrect: true,
+      quizSelectedAnswer: 1,
+      quizRewardClaimed: true,
+    }, 4);
 
     expect(migrated?.reminders[0].title).toBe("Teleconsulta com Dr. Marcos");
     expect(migrated?.reminders[1].title).toBe("Meu exame");
     expect(migrated?.cycleLogs).toHaveLength(1);
     expect(migrated?.cycleStartDate).toBe("2026-10-25");
-    expect(migrated?.quizAnswered).toBe(false);
-    expect(migrated?.quizSelectedAnswer).toBe(null);
+    expect(migrated?.lessonProgress["work-ride"]?.completed).toBe(true);
+    expect(migrated?.lessonProgress["work-weather"]?.completed).toBe(true);
+    expect(migrated?.pointsToday).toBe(35);
+    expect(migrated?.pointsDate).toBe(todayKey());
+    expect(migrated?.cashbackEarned).toBe(5);
+    expect("quizAnswered" in (migrated ?? {})).toBe(false);
   });
 });

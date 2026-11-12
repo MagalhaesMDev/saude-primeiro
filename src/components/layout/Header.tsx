@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const SECTION_LABELS: Record<string, string> = {
   "/": "Início",
+  "/painel": "Painel",
   "/meu-seguro": "Meu Seguro",
   "/cuidar": "Cuidar de Mim",
   "/aprender": "Aprender",

@@ -21,41 +21,36 @@ describe("AprenderPage", () => {
   beforeEach(() => {
     usePrototypeStore.setState({
       points: 280,
-      dailyPoints: 25,
-      dailyPointsDate: todayKey(),
-      quizAnswered: false,
-      quizCorrect: null,
-      quizSelectedAnswer: null,
-      quizRewardClaimed: false,
+      pointsToday: 25,
+      pointsDate: todayKey(),
+      cashbackEarned: 5,
+      lessonProgress: {},
     });
   });
 
-  it("responde ao selecionar uma alternativa e registra pontos demonstrativos", () => {
+  it("filtra trilhas e atualiza a lição em destaque e a prévia do quiz", () => {
     renderAprenderPage();
 
-    fireEvent.click(screen.getByRole("button", { name: /dobrar os joelhos/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Idosos" }));
 
-    expect(usePrototypeStore.getState().quizCorrect).toBe(true);
-    expect(usePrototypeStore.getState().quizSelectedAnswer).toBe(1);
-    expect(usePrototypeStore.getState().points).toBe(290);
-    expect(screen.getByRole("status")).toHaveTextContent(/pontuação demonstrativa respeita o limite/i);
-    expect(screen.getByRole("button", { name: /dobrar os joelhos/i })).toBeDisabled();
+    expect(screen.getByText("Filtro ativo: Idosos")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Casa segura para envelhecer com mais autonomia" })).toBeInTheDocument();
+    expect(screen.getByText(/o que pode ajudar a tornar a circulação em casa mais organizada/i)).toBeInTheDocument();
+    expect(screen.getByText("Cuidado e autonomia na melhor idade")).toBeInTheDocument();
+    expect(screen.queryByText("Deslocamentos com mais atenção")).not.toBeInTheDocument();
   });
 
-  it("exibe a alternativa correta sem conceder pontos para uma resposta incorreta", () => {
+  it("mostra um estado vazio para um tema sem trilhas e permite voltar a todos", () => {
     renderAprenderPage();
 
-    fireEvent.click(screen.getByRole("button", { name: /curvar a coluna/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Seguros" }));
 
-    expect(usePrototypeStore.getState().quizCorrect).toBe(false);
-    expect(usePrototypeStore.getState().points).toBe(280);
-    expect(screen.getByRole("status")).toHaveTextContent(/resposta incorreta/i);
-    expect(screen.getByText(/dobre os joelhos, mantenha as costas eretas/i)).toBeInTheDocument();
+    expect(screen.getByText("Filtro ativo: Seguros")).toBeInTheDocument();
+    expect(screen.getByText("Ainda não há trilhas para este tema.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ver todos" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /tentar novamente/i }));
-    fireEvent.click(screen.getByRole("button", { name: /dobrar os joelhos/i }));
-
-    expect(usePrototypeStore.getState().quizCorrect).toBe(true);
-    expect(usePrototypeStore.getState().points).toBe(290);
+    fireEvent.click(screen.getByRole("button", { name: "Ver todos" }));
+    expect(screen.getByText("Filtro ativo: Todos")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Deslocamentos com mais atenção" })).toBeInTheDocument();
   });
 });

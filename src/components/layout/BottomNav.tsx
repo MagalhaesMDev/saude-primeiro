@@ -1,7 +1,7 @@
 "use client";
 
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, ShieldPlus, HeartHandshake, BookOpen } from "lucide-react";
+import { LayoutDashboard, ShieldPlus, HeartHandshake, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -11,7 +11,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Início", href: "/", icon: Home },
+  { label: "Painel", href: "/painel", icon: LayoutDashboard },
   { label: "Meu Seguro", href: "/meu-seguro", icon: ShieldPlus },
   { label: "Cuidar", href: "/cuidar", icon: HeartHandshake },
   { label: "Aprender", href: "/aprender", icon: BookOpen },
