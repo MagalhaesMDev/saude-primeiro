@@ -79,7 +79,7 @@ function lesson(
     readingMinutes,
     points,
     cashback: 0.2,
-    imageSrc: `/lessons/${id}.jpg`,
+    imageSrc: `/lessons/themes/${id.split("-")[0]}.jpg`,
     imageAlt: `Ilustração educativa sobre ${title.toLocaleLowerCase("pt-BR")}`,
     steps,
     quiz,

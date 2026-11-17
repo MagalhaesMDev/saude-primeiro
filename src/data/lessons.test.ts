@@ -15,7 +15,7 @@ describe("lesson data", () => {
       for (const lesson of trail.lessons) {
         expect(lesson.steps.length).toBeGreaterThanOrEqual(3);
         expect(lesson.steps.length).toBeLessThanOrEqual(4);
-        expect(lesson.imageSrc).toBe(`/lessons/${lesson.id}.jpg`);
+        expect(lesson.imageSrc).toBe(`/lessons/themes/${trail.id}.jpg`);
         expect(lesson.imageAlt).toBeTruthy();
         expect(lesson.quiz).toHaveLength(2);
         for (const question of lesson.quiz) {

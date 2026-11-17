@@ -209,14 +209,14 @@ export default function AprenderPage() {
                     <Badge variant="secondary" className="font-bold uppercase tracking-wide">Lição em destaque</Badge>
                     <Badge variant="mint">+{featuredEntry.lesson.points} pts e R$ {featuredEntry.lesson.cashback.toFixed(2).replace(".", ",")} demonstrativos</Badge>
                   </div>
-                  <p className="mt-3 text-xs font-medium text-muted-foreground">{featuredEntry.trail.category}</p>
-                  <h2 className="mt-1 text-lg font-bold">{featuredEntry.lesson.title}</h2>
-                  <div className="relative mt-4 h-44 overflow-hidden rounded-2xl bg-primary/10">
-                    <LessonImage key={featuredEntry.lesson.id} lesson={featuredEntry.lesson} className="h-full w-full object-cover" />
-                    <Badge className="absolute bottom-2 left-2 gap-1 bg-foreground/75 text-white">
-                      <Timer className="h-3.5 w-3.5" />{featuredEntry.lesson.readingMinutes} min de leitura
-                    </Badge>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-medium text-muted-foreground">{featuredEntry.trail.category}</p>
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                      <Timer aria-hidden="true" className="h-3.5 w-3.5" />
+                      {featuredEntry.lesson.readingMinutes} min de leitura
+                    </span>
                   </div>
+                  <h2 className="mt-1 text-lg font-bold">{featuredEntry.lesson.title}</h2>
                   <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-primary">Prévia do quiz</p>
                   <p className="mt-2 text-sm font-semibold leading-snug">{featuredEntry.lesson.quiz[0].question}</p>
                   <p className="mt-2 text-xs text-muted-foreground">{featuredEntry.lesson.quiz.length} perguntas · abra a lição para responder e ver as explicações.</p>
@@ -245,6 +245,10 @@ export default function AprenderPage() {
                 {visibleTrails.map((trail) => {
                   const Icon = trail.icon;
                   const progress = getTrailProgress(trail, lessonProgress);
+                  const trailImage = {
+                    imageSrc: `/lessons/themes/${trail.id}.jpg`,
+                    imageAlt: `Imagem do tema ${trail.title.toLocaleLowerCase("pt-BR")}`,
+                  };
                   const nextTrailLesson = getNextLessonAcrossTrails([trail], lessonProgress)
                     ?? { trail, lesson: trail.lessons[0] };
                   const action = progress.completed === 0
@@ -255,10 +259,13 @@ export default function AprenderPage() {
                   return (
                     <Card key={trail.id}>
                       <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${trail.color}`}>
-                            <Icon aria-hidden="true" className="h-5 w-5" />
+                        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
+                          <LessonImage lesson={trailImage} className="h-full w-full object-contain" />
+                          <span className={`absolute bottom-2 left-2 flex h-8 w-8 items-center justify-center rounded-lg bg-background/90 ${trail.color}`}>
+                            <Icon aria-hidden="true" className="h-4 w-4" />
                           </span>
+                        </div>
+                        <div className="mt-4 flex items-start gap-3">
                           <div className="min-w-0 flex-1">
                             <Badge variant="secondary">{trail.category}</Badge>
                             <h3 className="mt-2 font-semibold">{trail.title}</h3>
